@@ -1,0 +1,24 @@
+﻿{
+  "productName": "Ultratree",
+  "version": "0.1.0",
+  "identifier": "com.ultratree.app",
+  "build": {
+    "frontendDist": "../dist",
+    "devUrl": "http://localhost:1420",
+    "beforeDevCommand": "npm run dev",
+    "beforeBuildCommand": "npm run build"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "Ultratree",
+        "width": 1280,
+        "height": 800,
+        "transparent": true,
+        "decorations": false,
+        "center": true,
+        "resizable": true
+      }
+    ]
+  }
+}
