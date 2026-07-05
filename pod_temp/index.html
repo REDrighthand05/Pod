@@ -574,7 +574,7 @@ var PodRender = (function(){
   function drawParticles(dt){
     var cw=canvas.width,ch=canvas.height,arr=particles.list;
     for(var i=0;i<arr.length;i++){var p=arr[i];if(p.layer==="near"){p.progress+=p.speed*dt;if(p.progress>1){p.progress=0;p.x=Math.random()*(cw+200)-100;p.y=Math.random()*(ch+200)-100;p.endX=p.x+(Math.random()-0.5)*400;p.endY=p.y+(Math.random()-0.5)*400;}}else{p.x+=p.vx*dt;p.y+=p.vy*dt;if(p.x<-80)p.x=cw+80;if(p.x>cw+80)p.x=-80;if(p.y<-80)p.y=ch+80;if(p.y>ch+80)p.y=-80;}}
-    ctx.save();for(var i=0;i<arr.length;i++){var p=arr[i];if(p.layer!=="far")continue;ctx.globalAlpha=p.alpha;ctx.fillStyle="#94a3b8";ctx.beginPath();ctx.arc(p.x,p.y,p.size,0,Math.PI*2);ctx.fill()ctx.shadowBlur=0;ctx.shadowColor="transparent";;}ctx.restore();
+    ctx.save();for(var i=0;i<arr.length;i++){var p=arr[i];if(p.layer!=="far")continue;ctx.globalAlpha=p.alpha;ctx.fillStyle="#94a3b8";ctx.beginPath();ctx.arc(p.x,p.y,p.size,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;ctx.shadowColor="transparent";;}ctx.restore();
     ctx.save();for(var i=0;i<arr.length;i++){var p=arr[i];if(p.layer!=="mid")continue;ctx.globalAlpha=p.alpha;ctx.shadowBlur=6;ctx.shadowColor="rgba(147,197,253,0.25)";ctx.fillStyle="#e2e8f0";ctx.beginPath();ctx.arc(p.x,p.y,p.size,0,Math.PI*2);ctx.fill();}ctx.restore();
     ctx.save();for(var i=0;i<arr.length;i++){var p=arr[i];if(p.layer!=="near")continue;var cx=p.x+(p.endX-p.x)*p.progress,cy=p.y+(p.endY-p.y)*p.progress;var sa=0.3+0.5*Math.sin(p.progress*Math.PI);var dx=p.endX-p.x,dy=p.endY-p.y,len=Math.sqrt(dx*dx+dy*dy);if(len>0){dx/=len;dy/=len;}ctx.globalAlpha=sa;ctx.strokeStyle="rgba(96,165,250,0.5)";ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx-dx*20,cy-dy*20);ctx.stroke();ctx.fillStyle="rgba(147,197,253,0.85)";ctx.beginPath();ctx.arc(cx,cy,2,0,Math.PI*2);ctx.fill();}ctx.restore();
   }
@@ -585,7 +585,7 @@ var PodRender = (function(){
     for(var i=0;i<renderNodes.length;i++){var c=renderNodes[i];var pids=c.parentIds||[];for(var j=0;j<pids.length;j++){var p=renderMap[pids[j]];if(p)drawLink(p,c);}}
   }
   function drawLink(from,to){
-    var x1=from.x,y1=from.y+(from._floatOffset||0),x2=to.x,y2=to.y+(to._floatOffset||0);
+    var cx=camera.x,cy=camera.y,cz=camera.zoom,w2=canvas.width/2,h2=canvas.height/2;var x1=(from.x-cx)*cz+w2,y1=(from.y+(from._floatOffset||0)-cy)*cz+h2;var x2=(to.x-cx)*cz+w2,y2=(to.y+(to._floatOffset||0)-cy)*cz+h2;
     var dx=x2-x1,cp1x=x1+dx*0.4,cp1y=y1,cp2x=x2-dx*0.4,cp2y=y2;
     ctx.beginPath();ctx.moveTo(x1,y1);ctx.bezierCurveTo(cp1x,cp1y,cp2x,cp2y,x2,y2);ctx.strokeStyle="rgba(51,65,85,0.3)";ctx.lineWidth=1.5;ctx.stroke();
     var p0={x:x1,y:y1},p1={x:cp1x,y:cp1y},p2={x:cp2x,y:cp2y},p3={x:x2,y:y2},nd=3,sp=0.15,off=flowPhase*sp;
@@ -696,7 +696,7 @@ var PodRender = (function(){
     padding=padding||80;if(!nodes||!nodes.length)return;
     var mx=Infinity,my=Infinity,xx=-Infinity,xy=-Infinity;
     for(var i=0;i<nodes.length;i++){var n=nodes[i];if(n.x<mx)mx=n.x;if(n.y<my)my=n.y;if(n.x>xx)xx=n.x;if(n.y>xy)xy=n.y;}
-    var ww=xx-mx+padding*2,wh=xy-my+padding*2;this.zoom=Math.min(canvas.width/ww,canvas.height/wh);this.x=(mx+xx)/2;this.y=(my+xy)/2;
+    var ww=xx-mx+padding*2,wh=xy-my+padding*2;this.zoom=Math.min(this.maxZoom,Math.max(this.minZoom,Math.min(canvas.width/ww,canvas.height/wh)));this.x=(mx+xx)/2;this.y=(my+xy)/2;
   };
   camera.setZoom=function(z){this.zoom=Math.min(this.maxZoom,Math.max(this.minZoom,z));};
 
