@@ -351,7 +351,7 @@ var PodData = (function() {
           (n.tags || []).some(function(t) { return t.toLowerCase().indexOf(q) !== -1; })
         );
       }).slice(0, 12);
-    }
+    },
   
     getSiblings: function(id) {
       var node = nodeMap[id]; if (!node) return []; var siblings = []; var seen = {};
