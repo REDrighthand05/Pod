@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -297,6 +297,7 @@ var PodData = (function() {
     {id:"app",label:"应用与实践",description:"将理论应用于真实场景——工具链、安全、游戏与交互设计的工程实践。",icon:"⚒",prerequisites:[],resources:[],estHours:0,tier:1,category:"root",tags:["应用","实践"]},
     {id:"app-tools",label:"开发工具",description:"版本控制、构建工具、调试器与CI/CD——高效开发工作流的核心装备。",icon:"⚙",prerequisites:["app"],resources:[{name:"Pro Git",type:"book"},{name:"持续交付",type:"book"}],estHours:30,tier:2,category:"app",tags:["工具","Git","CI/CD"]},
     {id:"app-security",label:"安全与密码",description:"对称/非对称加密、认证协议、Web安全与渗透测试——保护系统与数据。",icon:"⊡",prerequisites:["app"],resources:[{name:"图解密码技术",type:"book"},{name:"白帽子讲Web安全",type:"book"},{name:"Stanford CS255",type:"course"}],estHours:50,tier:2,category:"app",tags:["安全","密码学","渗透"]},
+,
     {id:"app-game",label:"游戏开发",description:"游戏引擎架构、渲染管线、物理模拟与游戏设计——从创意到可玩产品。",icon:"◈",prerequisites:["app"],resources:[{name:"游戏引擎架构",type:"book"},{name:"Unity/Unreal官方教程",type:"course"}],estHours:60,tier:2,category:"app",tags:["游戏","引擎","渲染"]},
     {id:"app-hci",label:"人机交互",description:"可用性工程、用户界面设计、交互范式与认知工效学——以人为中心的设计。",icon:"◉",prerequisites:["app"],resources:[{name:"设计心理学",type:"book"},{name:"About Face 4",type:"book"}],estHours:35,tier:2,category:"app",tags:["交互","UI/UX","可用性"]}
   ];  // Build indexes
@@ -499,7 +500,8 @@ var PodEngine = (function() {
       reorder: function(fromIdx,toIdx){
         if(fromIdx<0||fromIdx>=queueItems.length||toIdx<0||toIdx>=queueItems.length)return;
         var item=queueItems.splice(fromIdx,1)[0];queueItems.splice(toIdx,0,item);save();
-      },\r\n    getProgress: function(nodeId) {
+      },
+    getProgress: function(nodeId) {
       for(var i=0;i<queueItems.length;i++){
         if(queueItems[i].nodeId===nodeId){
           var node=PodData.getNode(nodeId);
