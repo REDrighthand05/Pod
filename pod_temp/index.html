@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -499,8 +499,7 @@ var PodEngine = (function() {
       reorder: function(fromIdx,toIdx){
         if(fromIdx<0||fromIdx>=queueItems.length||toIdx<0||toIdx>=queueItems.length)return;
         var item=queueItems.splice(fromIdx,1)[0];queueItems.splice(toIdx,0,item);save();
-      ,
-    getProgress: function(nodeId) {
+      },\r\n    getProgress: function(nodeId) {
       for(var i=0;i<queueItems.length;i++){
         if(queueItems[i].nodeId===nodeId){
           var node=PodData.getNode(nodeId);
@@ -518,7 +517,7 @@ var PodEngine = (function() {
         if(node&&node.estHours)total+=node.estHours;
       }
       return total;
-    }},
+      },
       has: function(nodeId){for(var i=0;i<queueItems.length;i++){if(queueItems[i].nodeId===nodeId)return true;}return false;}
     }
   };
@@ -615,7 +614,7 @@ var PodRender = (function(){
     // Body
     ctx.beginPath();
     var hw=r*2.5,hh=r*1.1;
-    ctx.roundRect(sx-hw/2,sy-hh/2,hw,hh,8*camera.zoom);
+    if(ctx.roundRect){ctx.roundRect(sx-hw/2,sy-hh/2,hw,hh,8*camera.zoom);}else{var rr=8*camera.zoom,sx2=sx-hw/2,sy2=sy-hh/2;ctx.moveTo(sx2+rr,sy2);ctx.lineTo(sx2+hw-rr,sy2);ctx.arcTo(sx2+hw,sy2,sx2+hw,sy2+rr,rr);ctx.lineTo(sx2+hw,sy2+hh-rr);ctx.arcTo(sx2+hw,sy2+hh,sx2+hw-rr,sy2+hh,rr);ctx.lineTo(sx2+rr,sy2+hh);ctx.arcTo(sx2,sy2+hh,sx2,sy2+hh-rr,rr);ctx.lineTo(sx2,sy2+rr);ctx.arcTo(sx2,sy2,sx2+rr,sy2,rr);}
     ctx.fillStyle=fillCol;ctx.fill();
     ctx.strokeStyle=borderCol;ctx.lineWidth=1.5*camera.zoom;ctx.stroke();
     // Reset shadow
