@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pod — 科技树</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;background:#06060e;color:#e2e8f0;font-family:"Inter","PingFang SC","Microsoft YaHei",sans-serif;-webkit-font-smoothing:antialiased;user-select:none}
+
+/* ── Background ── */
+.bg-layer{position:fixed;inset:0;z-index:0;overflow:hidden}
+.bg-layer .orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:.25}
+.bg-layer .orb:nth-child(1){width:600px;height:600px;background:radial-gradient(circle,rgba(59,130,246,0.4),transparent 70%);top:-120px;left:-80px}
+.bg-layer .orb:nth-child(2){width:500px;height:500px;background:radial-gradient(circle,rgba(139,92,246,0.3),transparent 70%);bottom:-100px;right:-60px}
+.bg-layer .orb:nth-child(3){width:400px;height:400px;background:radial-gradient(circle,rgba(16,185,129,0.2),transparent 70%);top:40%;right:20%}
+.bg-layer .orb:nth-child(4){width:350px;height:350px;background:radial-gradient(circle,rgba(236,72,153,0.15),transparent 70%);bottom:20%;left:10%}
+
+/* ── Glass Panel ── */
+.glass-panel{position:relative;z-index:1;display:flex;flex-direction:column;width:100%;height:100%;background:rgba(7,7,20,0.68);backdrop-filter:blur(48px) saturate(120%);-webkit-backdrop-filter:blur(48px) saturate(120%)}
+
+/* ── Titlebar ── */
+.titlebar{height:46px;display:flex;align-items:center;padding:0 16px;flex-shrink:0;border-bottom:1px solid rgba(255,255,255,0.04);-webkit-app-region:drag}
+.titlebar .logo{width:26px;height:26px;display:flex;align-items:center;justify-content:center;background:rgba(96,165,250,0.1);border:1px solid rgba(96,165,250,0.2);border-radius:6px;color:#60a5fa;font-size:12px}
+.titlebar .title{font-size:13px;font-weight:500;color:#cbd5e1;margin-left:10px;letter-spacing:.3px}
+.titlebar .ver{font-size:10px;color:rgba(100,116,139,0.4);margin-left:6px}
+.titlebar .spacer{flex:1}
+.titlebar .status-dot{width:6px;height:6px;border-radius:50%;background:#34d399;box-shadow:0 0 8px rgba(52,211,153,0.3)}
+.titlebar .status-text{font-size:10px;color:rgba(148,163,184,0.4);margin-left:6px;letter-spacing:.2px}
+
+/* ── Navbar ── */
+.navbar{height:40px;display:flex;align-items:center;padding:0 12px;flex-shrink:0;border-bottom:1px solid rgba(255,255,255,0.025);gap:6px}
+.navbar .seg{display:flex;background:rgba(255,255,255,0.03);border-radius:8px;padding:2px}
+.navbar .seg-btn{padding:5px 14px;border:none;background:transparent;color:#64748b;font-size:11.5px;font-family:inherit;cursor:pointer;border-radius:6px;transition:all .12s}
+.navbar .seg-btn:hover{color:#93c5fd;background:rgba(96,165,250,0.06)}
+.navbar .seg-btn.act{background:rgba(96,165,250,0.12);color:#60a5fa}
+.navbar .spacer{flex:1}
+.navbar .icon-btn{width:30px;height:30px;border:none;background:transparent;color:#64748b;font-size:16px;cursor:pointer;border-radius:6px;display:flex;align-items:center;justify-content:center}
+.navbar .icon-btn:hover{background:rgba(255,255,255,0.04);color:#94a3b8}
+
+/* ── Canvas ── */
+.canvas-wrap{flex:1;position:relative;overflow:hidden;cursor:grab}
+.canvas-wrap:active{cursor:grabbing}
+.canvas-wrap canvas{display:block;width:100%;height:100%}
+
+/* ── Detail Panel ── */
+.detail-overlay{position:fixed;top:0;left:0;right:0;bottom:0;z-index:10000;background:rgba(0,0,0,0.35);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);opacity:0;visibility:hidden;transition:opacity .3s ease,visibility .3s ease}
+.detail-overlay.active{opacity:1;visibility:visible}
+.detail-panel{position:absolute;top:0;right:0;width:400px;height:100%;background:rgba(22,22,30,0.88);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-left:1px solid rgba(255,255,255,0.06);box-shadow:-8px 0 32px rgba(0,0,0,0.3);transform:translateX(100%);transition:transform .4s cubic-bezier(0.22,1,0.36,1);overflow-y:auto;padding:28px 24px;color:#e0e0e0;font-family:"Inter","PingFang SC",-apple-system,sans-serif}
+.detail-overlay.active .detail-panel{transform:translateX(0)}
+.detail-close{position:absolute;top:16px;right:16px;width:32px;height:32px;border:none;background:rgba(255,255,255,0.06);border-radius:8px;color:#888;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.detail-close:hover{background:rgba(255,255,255,0.12);color:#fff}
+.detail-icon{font-size:40px;margin-bottom:8px}
+.detail-name{font-size:22px;font-weight:600;color:#fff;margin-bottom:4px;line-height:1.3}
+.detail-path{font-size:13px;color:#888;margin-bottom:20px;line-height:1.4}
+.detail-section{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:#666;margin-top:16px;margin-bottom:6px}
+.detail-desc{font-size:14px;line-height:1.6;color:#bbb}
+.detail-rank{display:flex;gap:6px}
+.rank-lvl{width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:12px;font-weight:600;border:2px solid rgba(255,255,255,0.1);color:#555;transition:all .2s}
+.rank-lvl.has{border-color:#4ade80;color:#4ade80;background:rgba(74,222,128,0.1)}
+.rank-lvl.cur{border-color:#60a5fa;color:#60a5fa;background:rgba(96,165,250,0.15);box-shadow:0 0 12px rgba(96,165,250,0.2)}
+.detail-prereqs,.detail-next{display:flex;flex-wrap:wrap;gap:6px}
+.detail-chip{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:6px;font-size:12px;background:rgba(255,255,255,0.06);color:#bbb;cursor:default;transition:background .2s}
+.detail-chip:hover{background:rgba(255,255,255,0.1)}
+.detail-chip .chip-icon{font-size:10px}
+.detail-resource{display:block;padding:8px 10px;border-radius:6px;background:rgba(255,255,255,0.04);color:#bbb;font-size:13px;text-decoration:none;margin-bottom:4px;transition:background .2s;line-height:1.4}
+.detail-resource:hover{background:rgba(255,255,255,0.08);color:#fff}
+.detail-resource .res-type{display:inline-block;font-size:10px;font-weight:600;padding:1px 6px;border-radius:4px;background:rgba(96,165,250,0.15);color:#60a5fa;margin-right:6px}
+.detail-hours{font-size:20px;font-weight:600;color:#fbbf24}
+.detail-btn{display:block;width:100%;padding:12px;margin-top:24px;border:none;border-radius:10px;font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;transition:all .25s}
+.detail-btn:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(99,102,241,0.35)}
+.detail-btn:active{transform:translateY(0)}
+.detail-btn.in-queue{background:rgba(255,255,255,0.08);color:#60a5fa}
+.detail-btn.in-queue:hover{background:rgba(255,255,255,0.12);box-shadow:none}
+
+/* ── Queue Panel ── */
+.queue-overlay{position:fixed;top:0;left:0;right:0;bottom:0;z-index:9000;background:rgba(0,0,0,0.25);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);opacity:0;visibility:hidden;transition:opacity .25s ease,visibility .25s ease}
+.queue-overlay.active{opacity:1;visibility:visible}
+.queue-panel{position:absolute;bottom:64px;right:24px;width:380px;max-height:520px;background:rgba(22,22,30,0.88);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,0.06);border-radius:14px;box-shadow:0 12px 40px rgba(0,0,0,0.4);display:flex;flex-direction:column;transform:scale(0.92) translateY(16px);opacity:0;transition:transform .3s cubic-bezier(0.22,1,0.36,1),opacity .3s ease;font-family:"Inter","PingFang SC",-apple-system,sans-serif;color:#e0e0e0;overflow:hidden}
+.queue-overlay.active .queue-panel{transform:scale(1) translateY(0);opacity:1}
+.queue-header{display:flex;align-items:center;gap:8px;padding:16px 20px 12px;border-bottom:1px solid rgba(255,255,255,0.06)}
+.queue-title{font-size:15px;font-weight:600;color:#fff}
+.queue-badge{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 6px;border-radius:10px;font-size:11px;font-weight:600;background:#6366f1;color:#fff}
+.queue-close{margin-left:auto;width:28px;height:28px;border:none;background:transparent;border-radius:6px;color:#666;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.queue-close:hover{background:rgba(255,255,255,0.08);color:#fff}
+.queue-list{flex:1;overflow-y:auto;padding:8px 12px;min-height:80px}
+.queue-list-empty{display:flex;align-items:center;justify-content:center;height:80px;color:#555;font-size:13px}
+.queue-footer{padding:10px 20px 14px;border-top:1px solid rgba(255,255,255,0.06)}
+.queue-clear{width:100%;padding:8px;border:none;border-radius:8px;font-size:12px;font-weight:500;font-family:inherit;cursor:pointer;background:rgba(239,68,68,0.1);color:#ef4444;transition:all .2s}
+.queue-clear:hover{background:rgba(239,68,68,0.2)}
+.queue-item{display:flex;align-items:center;gap:10px;padding:10px;border-radius:8px;margin-bottom:2px;cursor:grab;transition:background 0.15s;user-select:none;border:1px solid transparent}
+.queue-item:hover{background:rgba(255,255,255,0.04)}
+.queue-item.dragging{opacity:.4;background:rgba(99,102,241,0.08);border-color:rgba(99,102,241,0.2)}
+.queue-item.drag-over{border-top-color:#6366f1}
+.qi-icon{font-size:18px;width:32px;text-align:center;flex-shrink:0}
+.qi-info{flex:1;min-width:0}
+.qi-name{font-size:13px;font-weight:500;color:#e0e0e0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px}
+.qi-progress{display:flex;gap:3px}
+.qi-progress .qi-lvl{width:16px;height:16px;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:7px;font-weight:700;border:1.5px solid rgba(255,255,255,0.12);color:#444}
+.qi-progress .qi-lvl.has{border-color:#4ade80;color:#4ade80;background:rgba(74,222,128,0.1)}
+.qi-progress .qi-lvl.cur{border-color:#60a5fa;color:#60a5fa;background:rgba(96,165,250,0.12)}
+.qi-meta{display:flex;flex-direction:column;align-items:flex-end;gap:2px;flex-shrink:0}
+.qi-time{font-size:11px;color:#888;white-space:nowrap}
+.qi-tag{font-size:10px;font-weight:600;padding:1px 6px;border-radius:4px}
+.qi-tag.high{background:rgba(239,68,68,0.15);color:#ef4444}
+.qi-tag.medium{background:rgba(251,191,36,0.15);color:#fbbf24}
+.qi-tag.low{background:rgba(96,165,250,0.15);color:#60a5fa}
+.qi-remove{width:24px;height:24px;border:none;background:transparent;border-radius:6px;color:#555;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s;opacity:0}
+.queue-item:hover .qi-remove{opacity:1}
+.qi-remove:hover{background:rgba(239,68,68,0.15);color:#ef4444}
+
+/* ── Search ── */
+.search-mask{position:fixed;top:0;left:0;right:0;bottom:0;z-index:11000;background:rgba(0,0,0,0.5);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;align-items:flex-start;justify-content:center;padding-top:15vh;opacity:0;visibility:hidden;transition:opacity .25s ease,visibility .25s ease}
+.search-mask.active{opacity:1;visibility:visible}
+.search-dialog{width:520px;max-width:90vw;max-height:60vh;background:rgba(22,22,30,0.92);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,0.08);border-radius:16px;box-shadow:0 16px 48px rgba(0,0,0,0.5);display:flex;flex-direction:column;transform:translateY(-20px);transition:transform .3s cubic-bezier(0.22,1,0.36,1);font-family:"Inter","PingFang SC",-apple-system,sans-serif;overflow:hidden}
+.search-mask.active .search-dialog{transform:translateY(0)}
+.search-input{width:100%;padding:16px 20px;border:none;outline:none;background:transparent;font-size:16px;font-family:inherit;color:#fff;border-bottom:1px solid rgba(255,255,255,0.06)}
+.search-input::placeholder{color:#555}
+.search-results{flex:1;overflow-y:auto;padding:8px;min-height:60px}
+.search-results-empty{display:flex;align-items:center;justify-content:center;height:60px;color:#555;font-size:13px}
+.search-result-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;cursor:pointer;transition:background .15s}
+.search-result-item:hover,.search-result-item.active{background:rgba(255,255,255,0.06)}
+.sri-icon{font-size:20px;width:32px;text-align:center;flex-shrink:0}
+.sri-info{flex:1;min-width:0}
+.sri-name{font-size:14px;font-weight:500;color:#fff}
+.sri-path{font-size:11px;color:#666;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sri-match{font-size:11px;color:#60a5fa;flex-shrink:0}
+
+/* ── Status Bar ── */
+.status-bar{position:fixed;bottom:0;left:0;right:0;height:40px;z-index:8000;display:flex;align-items:center;gap:16px;padding:0 16px;background:rgba(10,10,14,0.85);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid rgba(255,255,255,0.04);font-family:"Inter","PingFang SC",-apple-system,sans-serif;font-size:12px;color:#777;user-select:none}
+.status-bar .spacer{flex:1}
+.status-bar b{color:#bbb;font-weight:600}
+.zoom-ctrl{display:flex;align-items:center;gap:6px}
+.zoom-ctrl button{width:24px;height:24px;border:none;background:rgba(255,255,255,0.04);border-radius:6px;color:#888;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;font-family:inherit;line-height:1}
+.zoom-ctrl button:hover{background:rgba(255,255,255,0.1);color:#fff}
+#zoomVal{min-width:38px;text-align:center;font-variant-numeric:tabular-nums;color:#999}
+.status-bar .time{color:#555;font-variant-numeric:tabular-nums}
+
+/* ── Scrollbars ── */
+.detail-panel::-webkit-scrollbar,.queue-list::-webkit-scrollbar,.search-results::-webkit-scrollbar{width:4px}
+.detail-panel::-webkit-scrollbar-track,.queue-list::-webkit-scrollbar-track,.search-results::-webkit-scrollbar-track{background:transparent}
+.detail-panel::-webkit-scrollbar-thumb,.queue-list::-webkit-scrollbar-thumb,.search-results::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.08);border-radius:2px}
+.detail-panel::-webkit-scrollbar-thumb:hover,.queue-list::-webkit-scrollbar-thumb:hover,.search-results::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,0.15)}
+
+/* ── Responsive ── */
+@media (max-width:640px){
+  .detail-panel{width:100%!important}
+  .queue-panel{right:8px;width:calc(100vw - 16px)}
+  .search-dialog{width:96vw;max-width:96vw}
+}
+</style>
+</head>
+<body>
+<div class="bg-layer">
+  <div class="orb"></div>
+  <div class="orb"></div>
+  <div class="orb"></div>
+  <div class="orb"></div>
+</div>
+<div class="glass-panel">
+  <div class="titlebar">
+    <div class="logo">◆</div>
+    <div class="title">Pod</div>
+    <div class="ver">v0.1.0</div>
+    <div class="spacer"></div>
+    <div class="status-dot"></div>
+    <div class="status-text">在线</div>
+  </div>
+  <div class="navbar">
+    <div class="seg">
+      <button class="seg-btn act" id="navSkill">技能树</button>
+      <button class="seg-btn" id="navTech">科技树</button>
+    </div>
+    <div class="spacer"></div>
+    <button class="icon-btn" id="searchToggle" title="搜索">⌕</button>
+    <button class="icon-btn" id="queueToggle" title="学习队列">☰</button>
+  </div>
+  <div class="canvas-wrap" id="canvasWrap">
+    <canvas id="treeCanvas"></canvas>
+    <div id="skillTreeOverlay" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(7,7,20,0.5);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);opacity:0;visibility:hidden;transition:opacity 0.3s ease,visibility 0.3s ease;z-index:10">
+      <div style="font-size:48px;margin-bottom:16px;opacity:0.3">🌳</div>
+      <div style="font-size:18px;font-weight:500;color:rgba(255,255,255,0.3);margin-bottom:8px">技能树视图</div>
+      <div style="font-size:13px;color:rgba(255,255,255,0.15)">开发中 · 敬请期待</div>
+    </div>
+  </div>
+</div>
+
+<div class="detail-overlay" id="detailOverlay">
+  <div class="detail-panel" id="detailPanel">
+    <button class="detail-close" id="detailClose">✕</button>
+    <div class="detail-icon" id="dIcon"></div>
+    <div class="detail-name" id="dName"></div>
+    <div class="detail-path" id="dPath"></div>
+    <div class="detail-section">描述</div>
+    <div class="detail-desc" id="dDesc"></div>
+    <div class="detail-section">学习等级</div>
+    <div class="detail-rank" id="dRank"></div>
+    <div class="detail-section">前置要求</div>
+    <div class="detail-prereqs" id="dPrereqs"></div>
+    <div class="detail-section">后续节点</div>
+    <div class="detail-next" id="dNext"></div>
+    <div class="detail-section">推荐资源</div>
+    <div class="detail-resources" id="dResources"></div>
+    <div class="detail-section">预计时间</div>
+    <div class="detail-hours" id="dHours"></div>
+    <button class="detail-btn" id="dQueueBtn">加入学习队列</button>
+  </div>
+</div>
+
+<div class="queue-overlay" id="queueOverlay">
+  <div class="queue-panel" id="queuePanel">
+    <div class="queue-header">
+      <div class="queue-title">学习队列</div>
+      <div class="queue-badge" id="queueBadge">0</div>
+      <button class="queue-close" id="queueClose">✕</button>
+    </div>
+    <div class="queue-list" id="queueList">
+      <div class="queue-list-empty" id="queueEmpty">队列为空，点击节点添加学习任务</div>
+    </div>
+    <div class="queue-footer">
+      <button class="queue-clear" id="queueClear">清空队列</button>
+    </div>
+  </div>
+</div>
+
+<div class="search-mask" id="searchMask">
+  <div class="search-dialog" id="searchDialog">
+    <input class="search-input" id="searchInput" type="text" placeholder="搜索节点名称、标签..." autocomplete="off">
+    <div class="search-results" id="searchResults">
+      <div class="search-results-empty" id="searchEmpty">输入关键词开始搜索</div>
+    </div>
+  </div>
+</div>
+
+<div class="status-bar" id="statusBar">
+  <span><b id="nodeCount">0</b> 节点</span>
+  <span class="spacer"></span>
+  <span>FPS <b id="fpsVal">0</b></span>
+  <div class="zoom-ctrl">
+    <button id="zoomOut">−</button>
+    <span id="zoomVal">85%</span>
+    <button id="zoomIn">+</button>
+  </div>
+</div>
+
+<script>/* =============================================
+   PodData — 47-node dataset
+   ============================================= */
+var PodData = (function() {
+  var nodes = [
+    {id:"root",label:"计算机科学知识体系",description:"计算机科学六大核心领域——数学理论、硬件体系、软件算法、系统工程、人工智能、应用实践，构筑完整的知识图谱。",icon:"🌳",prerequisites:[],resources:[],estHours:0,tier:0,category:"root",tags:["计算机科学","知识体系"]},
+    {id:"math",label:"数学与理论基础",description:"计算机科学的数学根基，涵盖离散结构、计算理论、信息论与数值方法。",icon:"∑",prerequisites:[],resources:[],estHours:0,tier:1,category:"root",tags:["数学","理论"]},
+    {id:"math-discrete",label:"离散数学",description:"研究离散结构的数学分支，是计算机科学最直接的数学基础。",icon:"⊂",prerequisites:["math"],resources:[{name:"离散数学及其应用",type:"book"},{name:"MIT 6.042J Mathematics for Computer Science",type:"course"}],estHours:80,tier:2,category:"math",tags:["离散数学","基础"]},
+    {id:"math-logic",label:"数理逻辑",description:"命题逻辑、谓词逻辑、推理系统——数学推理和程序验证的基石。",icon:"⊨",prerequisites:["math-discrete"],resources:[{name:"数理逻辑",type:"book"},{name:"数学原理",type:"book"}],estHours:40,tier:3,category:"math",tags:["逻辑","推理","证明"]},
+    {id:"math-graph",label:"图论",description:"图与网络的数学理论，广泛应用于网络分析、路径规划和社交图谱。",icon:"◌",prerequisites:["math-discrete"],resources:[{name:"图论导引",type:"book"},{name:"Coursera Algorithms on Graphs",type:"course"}],estHours:45,tier:3,category:"math",tags:["图","网络","组合"]},
+    {id:"math-combinatorics",label:"组合数学",description:"计数、排列组合、生成函数与鸽巢原理——算法分析与概率方法的基础。",icon:"⊄",prerequisites:["math-discrete"],resources:[{name:"组合数学",type:"book"},{name:"具体数学",type:"book"}],estHours:35,tier:3,category:"math",tags:["组合","计数","概率"]},
+    {id:"math-computation",label:"计算理论",description:"研究计算的本质与极限，包括自动机、可计算性和计算复杂性。",icon:"⟳",prerequisites:["math","math-discrete"],resources:[{name:"计算理论导引",type:"book"},{name:"自动机理论、语言和计算导论",type:"book"}],estHours:60,tier:2,category:"math",tags:["计算","自动机","复杂性"]},
+    {id:"math-automata",label:"自动机理论",description:"有限自动机、下推自动机、图灵机——形式语言与计算模型的根基。",icon:"↻",prerequisites:["math-computation"],resources:[{name:"自动机理论、语言和计算导论",type:"book"},{name:"Stanford CS154",type:"course"}],estHours:35,tier:3,category:"math",tags:["自动机","形式语言","正则"]},
+    {id:"math-complexity",label:"计算复杂度",description:"P/NP、NP完备性、近似算法——判定问题内在难度的理论框架。",icon:"⏳",prerequisites:["math-computation"],resources:[{name:"计算复杂性",type:"book"},{name:"算法导论复杂度章节",type:"book"}],estHours:40,tier:3,category:"math",tags:["复杂度","NP","P"]},
+    {id:"math-info-theory",label:"信息论",description:"信息的量化、存储与通信——熵、互信息、信道编码等核心概念。",icon:"ℹ",prerequisites:["math"],resources:[{name:"信息论基础",type:"book"},{name:"Elements of Information Theory",type:"book"}],estHours:45,tier:2,category:"math",tags:["信息","熵","编码"]},
+    {id:"math-numerical",label:"数值方法",description:"数值逼近、线性代数计算、微分方程数值解——科学计算的核心工具。",icon:"≈",prerequisites:["math"],resources:[{name:"数值分析",type:"book"},{name:"MIT 18.335",type:"course"}],estHours:50,tier:2,category:"math",tags:["数值","近似","计算"]},
+    {id:"hw",label:"硬件与体系结构",description:"计算机硬件组成与体系结构设计，从晶体管到网络通信的全栈理解。",icon:"⚙",prerequisites:[],resources:[],estHours:0,tier:1,category:"root",tags:["硬件","体系结构"]},
+    {id:"hw-digital",label:"数字逻辑",description:"布尔代数、逻辑门、组合与时序电路——数字系统设计的底层基础。",icon:"⊓",prerequisites:["hw"],resources:[{name:"数字逻辑与计算机设计",type:"book"},{name:"数字设计和计算机体系结构",type:"book"}],estHours:50,tier:2,category:"hw",tags:["数字逻辑","电路","布尔"]},
+    {id:"hw-arch",label:"处理器架构",description:"指令集架构、流水线、乱序执行、多核与向量处理——CPU设计的核心概念。",icon:"▣",prerequisites:["hw","hw-digital"],resources:[{name:"计算机组成与设计",type:"book"},{name:"计算机体系结构：量化研究方法",type:"book"},{name:"UC Berkeley CS61C",type:"course"}],estHours:70,tier:2,category:"hw",tags:["CPU","架构","流水线"]},
+    {id:"hw-memory",label:"存储体系",description:"存储器层次结构——缓存、主存、虚拟内存与存储系统的性能优化。",icon:"⬡",prerequisites:["hw","hw-arch"],resources:[{name:"计算机组成与设计存储章节",type:"book"},{name:"深入理解计算机系统存储部分",type:"book"}],estHours:35,tier:3,category:"hw",tags:["存储","缓存","内存"]},
+    {id:"hw-network",label:"计算机网络",description:"分层网络模型、TCP/IP协议栈、路由与交换——互联网的骨架。",icon:"◎",prerequisites:["hw"],resources:[{name:"计算机网络：自顶向下方法",type:"book"},{name:"Stanford CS144",type:"course"}],estHours:60,tier:2,category:"hw",tags:["网络","TCP/IP","协议"]},
+    {id:"sw",label:"软件与算法",description:"数据结构、算法设计、编程语言与软件架构——构建高效程序的支柱。",icon:"⌨",prerequisites:[],resources:[],estHours:0,tier:1,category:"root",tags:["软件","算法"]},
+    {id:"sw-ds",label:"数据结构",description:"信息在计算机中的组织方式——栈、队列、树、图与哈希表的原理与实现。",icon:"▤",prerequisites:["sw"],resources:[{name:"算法导论",type:"book"},{name:"MIT 6.006 Introduction to Algorithms",type:"course"}],estHours:60,tier:2,category:"sw",tags:["数据结构","基础"]},
+    {id:"sw-array",label:"数组与链表",description:"最基础的线性存储结构——数组的随机访问与链表的动态插入删除特性。",icon:"⊞",prerequisites:["sw-ds"],resources:[{name:"算法第四版",type:"book"},{name:"LeetCode 数组/链表专题",type:"practice"}],estHours:20,tier:3,category:"sw",tags:["数组","链表","线性结构"]},
+    {id:"sw-tree",label:"树结构",description:"二叉树、平衡树、堆与并查集——层次化数据组织与高效检索的基石。",icon:"♢",prerequisites:["sw-ds"],resources:[{name:"算法导论树章节",type:"book"},{name:"LeetCode 树专题",type:"practice"}],estHours:35,tier:3,category:"sw",tags:["树","二叉树","平衡树"]},
+    {id:"sw-algo",label:"算法设计",description:"分治、贪心、动态规划与图算法——解决计算问题的系统方法与范式。",icon:"⚡",prerequisites:["sw","sw-ds"],resources:[{name:"算法导论",type:"book"},{name:"算法设计手册",type:"book"},{name:"MIT 6.006/6.046",type:"course"}],estHours:80,tier:2,category:"sw",tags:["算法","设计","基础"]},
+    {id:"sw-sort",label:"排序算法",description:"比较排序、线性时间排序、外部排序——理解算法复杂度与设计的经典入口。",icon:"⇕",prerequisites:["sw-algo"],resources:[{name:"算法导论排序章节",type:"book"},{name:"Sorting Algorithm Visualizations",type:"tool"}],estHours:25,tier:3,category:"sw",tags:["排序","比较","复杂度"]},
+    {id:"sw-dp",label:"动态规划",description:"最优子结构与重叠子问题——从背包问题到序列比对的高效求解范式。",icon:"⊞",prerequisites:["sw-algo"],resources:[{name:"算法导论DP章节",type:"book"},{name:"算法竞赛入门经典DP部分",type:"book"}],estHours:45,tier:3,category:"sw",tags:["动态规划","优化","递归"]},
+    {id:"sw-pl",label:"编程语言",description:"类型系统、内存模型、抽象机制与编程范式——理解语言设计的深层原理。",icon:"⋯",prerequisites:["sw"],resources:[{name:"编程语言实现模式",type:"book"},{name:"Types and Programming Languages",type:"book"},{name:"Coursera Programming Languages",type:"course"}],estHours:50,tier:2,category:"sw",tags:["编程语言","类型","范式"]},
+    {id:"sw-arch",label:"软件架构",description:"设计模式、架构风格、微服务与DDD——构建可维护大规模系统的原则与实践。",icon:"◈",prerequisites:["sw","sw-algo"],resources:[{name:"架构整洁之道",type:"book"},{name:"设计模式",type:"book"},{name:"领域驱动设计",type:"book"}],estHours:60,tier:2,category:"sw",tags:["架构","设计模式","工程"]},
+    {id:"sys",label:"系统与工程",description:"操作系统、数据库与分布式系统——让软件可靠高效运行的核心基础设施。",icon:"⚡",prerequisites:[],resources:[],estHours:0,tier:1,category:"root",tags:["系统","工程"]},
+    {id:"sys-os",label:"操作系统",description:"操作系统原理——进程调度、内存管理、文件系统与设备驱动的核心机制。",icon:"⊟",prerequisites:["sys"],resources:[{name:"操作系统导论",type:"book"},{name:"深入理解计算机系统",type:"book"},{name:"MIT 6.S081",type:"course"}],estHours:80,tier:2,category:"sys",tags:["操作系统","内核","调度"]},
+    {id:"sys-process",label:"进程管理",description:"进程与线程模型、调度算法、同步互斥与死锁——并发执行的核心问题。",icon:"⊘",prerequisites:["sys-os"],resources:[{name:"操作系统导论并发章节",type:"book"},{name:"UNIX环境高级编程",type:"book"}],estHours:35,tier:3,category:"sys",tags:["进程","线程","并发","同步"]},
+    {id:"sys-memory",label:"内存管理",description:"分段分页、虚拟内存、页面置换与内存分配策略——存储资源的高效管理。",icon:"▣",prerequisites:["sys-os"],resources:[{name:"操作系统导论内存章节",type:"book"},{name:"深入理解计算机系统内存部分",type:"book"}],estHours:30,tier:3,category:"sys",tags:["内存","虚拟内存","分页"]},
+    {id:"sys-db",label:"数据库",description:"数据持久化与查询——关系模型、事务处理与存储引擎的核心原理。",icon:"▤",prerequisites:["sys"],resources:[{name:"数据库系统概论",type:"book"},{name:"数据库系统实现",type:"book"},{name:"CMU 15-445",type:"course"}],estHours:60,tier:2,category:"sys",tags:["数据库","SQL","事务"]},
+    {id:"sys-relational",label:"关系数据库",description:"关系模型、SQL查询优化、事务ACID与并发控制——经典数据库核心。",icon:"⊞",prerequisites:["sys-db"],resources:[{name:"数据库系统概论",type:"book"},{name:"CMU 15-445 Project",type:"course"}],estHours:40,tier:3,category:"sys",tags:["关系","SQL","ACID"]},
+    {id:"sys-nosql",label:"NoSQL",description:"键值、文档、列族与图数据库——非关系数据模型与CAP理论的权衡实践。",icon:"◌",prerequisites:["sys-db"],resources:[{name:"NoSQL精粹",type:"book"},{name:"Designing Data-Intensive Applications",type:"book"}],estHours:30,tier:3,category:"sys",tags:["NoSQL","CAP","分布式"]},
+    {id:"sys-distributed",label:"分布式系统",description:"一致性协议、分布式存储、共识算法与容错——构建大规模集群理论基础。",icon:"◎",prerequisites:["sys"],resources:[{name:"Designing Data-Intensive Applications",type:"book"},{name:"MIT 6.824 Distributed Systems",type:"course"}],estHours:80,tier:2,category:"sys",tags:["分布式","共识","一致性"]},
+    {id:"ai",label:"人工智能",description:"让机器具备感知、推理与决策能力的理论、算法与实践。",icon:"◇",prerequisites:[],resources:[],estHours:0,tier:1,category:"root",tags:["人工智能","机器学习"]},
+    {id:"ai-ml",label:"机器学习",description:"从数据中学习的算法——回归、分类、聚类与降维的统计基础。",icon:"⊡",prerequisites:["ai"],resources:[{name:"机器学习（周志华）",type:"book"},{name:"统计学习方法",type:"book"},{name:"Stanford CS229",type:"course"}],estHours:80,tier:2,category:"ai",tags:["机器学习","统计","基础"]},
+    {id:"ai-supervised",label:"监督学习",description:"线性回归、支持向量机、决策树与集成方法——基于标注数据的预测模型。",icon:"⊢",prerequisites:["ai-ml"],resources:[{name:"统计学习方法",type:"book"},{name:"The Elements of Statistical Learning",type:"book"},{name:"Stanford CS229",type:"course"}],estHours:50,tier:3,category:"ai",tags:["监督学习","分类","回归"]},
+    {id:"ai-unsupervised",label:"无监督学习",description:"聚类、降维、密度估计与生成模型——从无标签数据中发现隐藏结构。",icon:"⊣",prerequisites:["ai-ml"],resources:[{name:"机器学习聚类章节",type:"book"},{name:"Pattern Recognition and Machine Learning",type:"book"}],estHours:35,tier:3,category:"ai",tags:["无监督","聚类","降维"]},
+    {id:"ai-dl",label:"深度学习",description:"多层神经网络的原理——反向传播、激活函数、正则化与优化方法。",icon:"⊠",prerequisites:["ai","ai-ml"],resources:[{name:"深度学习（花书）",type:"book"},{name:"Stanford CS231n",type:"course"},{name:"fast.ai Practical Deep Learning",type:"course"}],estHours:70,tier:2,category:"ai",tags:["深度学习","神经网络","反向传播"]},
+    {id:"ai-cnn",label:"卷积网络",description:"卷积、池化与全连接——图像特征提取与视觉理解的基石架构。",icon:"⊟",prerequisites:["ai-dl"],resources:[{name:"Stanford CS231n",type:"course"},{name:"深度学习卷积章节",type:"book"}],estHours:40,tier:3,category:"ai",tags:["CNN","卷积","视觉"]},
+    {id:"ai-transformer",label:"Transformer",description:"自注意力机制与多头注意力——现代NLP与多模态模型的革命性架构。",icon:"⟐",prerequisites:["ai-dl"],resources:[{name:"Attention Is All You Need",type:"paper"},{name:"The Annotated Transformer",type:"article"},{name:"Stanford CS224n",type:"course"}],estHours:45,tier:3,category:"ai",tags:["Transformer","注意力","NLP"]},
+    {id:"ai-nlp",label:"自然语言处理",description:"词嵌入、序列标注、文本生成与预训练语言模型——让计算机理解语言。",icon:"⊡",prerequisites:["ai","ai-ml","ai-dl"],resources:[{name:"Speech and Language Processing",type:"book"},{name:"Stanford CS224n",type:"course"}],estHours:60,tier:3,category:"ai",tags:["NLP","语言模型","文本"]},
+    {id:"ai-cv",label:"计算机视觉",description:"图像分类、目标检测、语义分割与生成——赋予机器看的能力。",icon:"◰",prerequisites:["ai","ai-dl","ai-cnn"],resources:[{name:"Stanford CS231n",type:"course"},{name:"Computer Vision: Algorithms and Applications",type:"book"}],estHours:55,tier:4,category:"ai",tags:["视觉","图像","检测"]},
+    {id:"app",label:"应用与实践",description:"将理论应用于真实场景——工具链、安全、游戏与交互设计的工程实践。",icon:"⚒",prerequisites:[],resources:[],estHours:0,tier:1,category:"root",tags:["应用","实践"]},
+    {id:"app-tools",label:"开发工具",description:"版本控制、构建工具、调试器与CI/CD——高效开发工作流的核心装备。",icon:"⚙",prerequisites:["app"],resources:[{name:"Pro Git",type:"book"},{name:"持续交付",type:"book"}],estHours:30,tier:2,category:"app",tags:["工具","Git","CI/CD"]},
+    {id:"app-security",label:"安全与密码",description:"对称/非对称加密、认证协议、Web安全与渗透测试——保护系统与数据。",icon:"⊡",prerequisites:["app"],resources:[{name:"图解密码技术",type:"book"},{name:"白帽子讲Web安全",type:"book"},{name:"Stanford CS255",type:"course"}],estHours:50,tier:2,category:"app",tags:["安全","密码学","渗透"]},
+    {id:"app-game",label:"游戏开发",description:"游戏引擎架构、渲染管线、物理模拟与游戏设计——从创意到可玩产品。",icon:"◈",prerequisites:["app"],resources:[{name:"游戏引擎架构",type:"book"},{name:"Unity/Unreal官方教程",type:"course"}],estHours:60,tier:2,category:"app",tags:["游戏","引擎","渲染"]},
+    {id:"app-hci",label:"人机交互",description:"可用性工程、用户界面设计、交互范式与认知工效学——以人为中心的设计。",icon:"◉",prerequisites:["app"],resources:[{name:"设计心理学",type:"book"},{name:"About Face 4",type:"book"}],estHours:35,tier:2,category:"app",tags:["交互","UI/UX","可用性"]}
+  ];  // Build indexes
+  var nodeMap = {};
+  var childrenMap = {};
+  nodes.forEach(function(n) {
+    nodeMap[n.id] = n;
+    childrenMap[n.id] = [];
+    n.parentIds = [];
+    n.state = "visible";
+    n._floatOffset = 0;
+    n._enterScale = 1;
+    n.selected = false;
+    n._selectedTime = 0;
+  });
+  nodes.forEach(function(n) {
+    if (n.prerequisites && n.prerequisites.length) {
+      n.prerequisites.forEach(function(pid) {
+        if (nodeMap[pid] && pid !== "root") {
+          n.parentIds.push(pid);
+          childrenMap[pid].push(n.id);
+        }
+      });
+    }
+  });
+  function assignDepth(id, depth) {
+    var n = nodeMap[id];
+    if (!n) return;
+    if (n._depthAssigned !== undefined && n._depthAssigned <= depth) return;
+    n._depthAssigned = depth;
+    (childrenMap[id] || []).forEach(function(cid) { assignDepth(cid, depth + 1); });
+  }
+  nodes.forEach(function(n) { if (n.tier === 1 && n.id !== "root") assignDepth(n.id, 1); });
+  assignDepth("root", 0);
+  // Demo mastered/learning states
+  ["math-discrete","hw-digital","sw-ds","sw-array","sw-tree","sys-process","ai-ml","math-logic"].forEach(function(id) {
+    if (nodeMap[id]) nodeMap[id].state = "mastered";
+  });
+  ["sys-os","math-graph"].forEach(function(id) { if (nodeMap[id]) nodeMap[id].state = "learning"; });
+
+  return {
+    all: nodes, map: nodeMap, children: childrenMap,
+    getNode: function(id) { return nodeMap[id] || null; },
+    getChildren: function(id) { return childrenMap[id] || []; },
+    getFiltered: function(query) {
+      if (!query || !query.trim()) return [];
+      var q = query.toLowerCase().trim();
+      return nodes.filter(function(n) {
+        return n.id !== "root" && (
+          n.label.toLowerCase().indexOf(q) !== -1 ||
+          n.id.toLowerCase().indexOf(q) !== -1 ||
+          (n.tags || []).some(function(t) { return t.toLowerCase().indexOf(q) !== -1; })
+        );
+      }).slice(0, 12);
+    }
+  };
+})();/* =============================================
+   PodEngine — layout, queue, search
+   ============================================= */
+var PodEngine = (function() {
+  var queueItems = [];
+  try { var saved = localStorage.getItem("pod_queue"); if (saved) queueItems = JSON.parse(saved); } catch(e) {}
+
+  function save() { try { localStorage.setItem("pod_queue", JSON.stringify(queueItems)); } catch(e) {} }
+
+  function computeLayout(nodes, nodeMap) {
+    var n = nodes.length;
+    if (n === 0) return;
+    // Radial init by depth
+    var byDepth = {};
+    nodes.forEach(function(node) {
+      var d = node._depthAssigned || 1;
+      if (!byDepth[d]) byDepth[d] = [];
+      byDepth[d].push(node);
+    });
+    var depths = Object.keys(byDepth).map(Number).sort(function(a,b){return a-b;});
+    var centerX = 0, centerY = -200, radiusStep = 120;
+    depths.forEach(function(d) {
+      var list = byDepth[d], count = list.length, r = (d-1)*radiusStep + 80;
+      list.forEach(function(node, i) {
+        var angle = (i/count)*Math.PI*2 - Math.PI/2;
+        node.x = centerX + r*Math.cos(angle);
+        node.y = centerY + r*Math.sin(angle);
+      });
+    });
+    // Force iterations
+    var alpha = 1.0, alphaMin = 0.001, alphaDecay = 0.985, velocityDecay = 0.6;
+    for (var iter=0; iter<300; iter++) {
+      if (alpha < alphaMin) break;
+      var forces = [];
+      for (var i=0;i<n;i++) forces.push({fx:0,fy:0});
+      // 1. Repulsion
+      for (var i=0;i<n;i++) {
+        for (var j=i+1;j<n;j++) {
+          var dx=nodes[j].x-nodes[i].x,dy=nodes[j].y-nodes[i].y,ds=dx*dx+dy*dy;
+          if (ds > 90000) continue;
+          var dist=Math.sqrt(ds)||1;
+          var rep = (nodes[i]._depthAssigned===nodes[j]._depthAssigned?8000:4000)/ds;
+          var fx=(dx/dist)*rep,fy=(dy/dist)*rep;
+          forces[i].fx-=fx;forces[i].fy-=fy;forces[j].fx+=fx;forces[j].fy+=fy;
+        }
+      }
+      // 2. Spring along parent-child links
+      for (var i=0;i<n;i++) {
+        var pids=nodes[i].parentIds||[];
+        for (var pi=0;pi<pids.length;pi++) {
+          var p=nodeMap[pids[pi]];if(!p)continue;
+          dx=p.x-nodes[i].x;dy=p.y-nodes[i].y;dist=Math.sqrt(dx*dx+dy*dy)||1;
+          var spring=0.01*(dist-120);
+          forces[i].fx+=(dx/dist)*spring;forces[i].fy+=(dy/dist)*spring;
+          var pi2=-1;for(var k=0;k<n;k++){if(nodes[k].id===p.id){pi2=k;break;}}
+          if(pi2>=0){forces[pi2].fx-=(dx/dist)*spring;forces[pi2].fy-=(dy/dist)*spring;}
+        }
+      }
+      // 3. Category cohesion
+      for(var i=0;i<n;i++){for(var j=i+1;j<n;j++){
+        if(nodes[i].category===nodes[j].category&&nodes[i].category!=='root'){
+          dx=nodes[j].x-nodes[i].x;dy=nodes[j].y-nodes[i].y;dist=Math.sqrt(dx*dx+dy*dy)||1;
+          var cat=0.005*(dist-200);fx=(dx/dist)*cat;fy=(dy/dist)*cat;
+          forces[i].fx+=fx;forces[i].fy+=fy;forces[j].fx-=fx;forces[j].fy-=fy;
+        }
+      }}
+      // 4. Center pull
+      for(var i=0;i<n;i++){if(!nodes[i].parentIds||!nodes[i].parentIds.length){continue;}
+        forces[i].fx+=(0-nodes[i].x)*0.001;forces[i].fy+=(0-nodes[i].y)*0.001;}
+      // 5. Layer Y alignment
+      var dy={},dc={};
+      for(var i=0;i<n;i++){var d=nodes[i]._depthAssigned||1;if(!dy[d]){dy[d]=0;dc[d]=0;}dy[d]+=nodes[i].y;dc[d]++;}
+      for(var d in dy)dy[d]/=dc[d];
+      for(var i=0;i<n;i++){var ty=dy[nodes[i]._depthAssigned||1]||nodes[i].y;forces[i].fy+=(ty-nodes[i].y)*0.02;}
+      // Apply forces
+      var dmp=alpha*velocityDecay,ms=0;
+      for(var i=0;i<n;i++){nodes[i].x+=forces[i].fx*dmp;nodes[i].y+=forces[i].fy*dmp;
+        var sp=Math.abs(forces[i].fx*dmp)+Math.abs(forces[i].fy*dmp);if(sp>ms)ms=sp;}
+      alpha*=alphaDecay;if(ms<0.1&&alpha<0.05)alpha=0;
+    }
+  }
+
+  return {
+    forceLayout: computeLayout,
+    queue: {
+      items: queueItems,
+      add: function(nodeId) {
+        for(var i=0;i<queueItems.length;i++){if(queueItems[i].nodeId===nodeId)return false;}
+        queueItems.push({nodeId:nodeId,addedAt:Date.now(),priority:"medium",targetLevel:5,hoursSpent:0});save();return true;
+      },
+      remove: function(nodeId) {
+        for(var i=0;i<queueItems.length;i++){if(queueItems[i].nodeId===nodeId){queueItems.splice(i,1);save();return true;}}
+        return false;
+      },
+      clear: function(){queueItems.length=0;save();},
+      reorder: function(fromIdx,toIdx){
+        if(fromIdx<0||fromIdx>=queueItems.length||toIdx<0||toIdx>=queueItems.length)return;
+        var item=queueItems.splice(fromIdx,1)[0];queueItems.splice(toIdx,0,item);save();
+      },
+      has: function(nodeId){for(var i=0;i<queueItems.length;i++){if(queueItems[i].nodeId===nodeId)return true;}return false;}
+    }
+  };
+})();/* =============================================
+   PodRender — Canvas rendering engine
+   ============================================= */
+var PodRender = (function(){
+  var canvas, ctx, running=false, rafId=null, lastTime=0;
+  var camera={x:0,y:0,zoom:0.85,minZoom:0.2,maxZoom:3.0,_velX:0,_velY:0,_dragging:false,_lastMX:0,_lastMY:0,_dragDamping:0.92};
+  var particles={list:[],gridSpacing:40};
+  var renderNodes=[],renderMap={};
+  var pulsePhase=0,flowPhase=0,hoveredNode=null,selectedNode=null;
+  var onNodeClick=null;
+
+  function init(canvasEl){
+    canvas=canvasEl;
+    if(!canvas)return;
+    canvas.width=canvas.parentElement.clientWidth;
+    canvas.height=canvas.parentElement.clientHeight;
+    ctx=canvas.getContext("2d");
+    initParticles();
+    bindEvents();
+    resize();
+  }
+
+  function resize(){
+    if(!canvas||!canvas.parentElement)return;
+    canvas.width=canvas.parentElement.clientWidth;
+    canvas.height=canvas.parentElement.clientHeight;
+  }
+
+  function initParticles(){
+    var list=[];var cw=800,ch=600;
+    for(var i=0;i<40;i++){list.push({x:Math.random()*cw,y:Math.random()*ch,size:Math.random()*1.5+0.5,alpha:Math.random()*0.3+0.1,speed:Math.random()*0.3+0.1,vx:(Math.random()-0.5)*20,vy:(Math.random()-0.5)*20,progress:Math.random(),endX:Math.random()*cw,endY:Math.random()*ch,layer:"far"});}
+    for(var i=0;i<20;i++){list.push({x:Math.random()*cw,y:Math.random()*ch,size:Math.random()*2+1,alpha:Math.random()*0.25+0.15,speed:Math.random()*0.2+0.05,vx:(Math.random()-0.5)*15,vy:(Math.random()-0.5)*15,progress:Math.random(),endX:Math.random()*cw,endY:Math.random()*ch,layer:"mid"});}
+    for(var i=0;i<12;i++){list.push({x:Math.random()*cw,y:Math.random()*ch,size:Math.random()*1+0.5,alpha:Math.random()*0.4+0.2,speed:Math.random()*0.4+0.15,vx:0,vy:0,progress:Math.random(),endX:Math.random()*cw,endY:Math.random()*ch,layer:"near"});}
+    particles.list=list;
+  }
+
+  function bezierPoint(p0,p1,p2,p3,t){var u=1-t;return{x:u*u*u*p0.x+3*u*u*t*p1.x+3*u*t*t*p2.x+t*t*t*p3.x,y:u*u*u*p0.y+3*u*u*t*p1.y+3*u*t*t*p2.y+t*t*t*p3.y};}
+
+  function drawGrid(){
+    var sp=particles.gridSpacing,w=canvas.width,h=canvas.height;
+    var lw=-w/2/camera.zoom+camera.x,rw=w/2/camera.zoom+camera.x;
+    var tw=-h/2/camera.zoom+camera.y,bw=h/2/camera.zoom+camera.y;
+    ctx.save();ctx.strokeStyle="rgba(255,255,255,0.03)";ctx.lineWidth=0.5;
+    for(var n=Math.floor(lw/sp);n<=Math.ceil(rw/sp);n++){var sx=(n*sp-camera.x)*camera.zoom+w/2;ctx.beginPath();ctx.moveTo(sx,0);ctx.lineTo(sx,h);ctx.stroke();}
+    for(var m=Math.floor(tw/sp);m<=Math.ceil(bw/sp);m++){var sy=(m*sp-camera.y)*camera.zoom+h/2;ctx.beginPath();ctx.moveTo(0,sy);ctx.lineTo(w,sy);ctx.stroke();}
+    ctx.restore();
+  }
+
+  function drawParticles(dt){
+    var cw=canvas.width,ch=canvas.height,arr=particles.list;
+    for(var i=0;i<arr.length;i++){var p=arr[i];if(p.layer==="near"){p.progress+=p.speed*dt;if(p.progress>1){p.progress=0;p.x=Math.random()*(cw+200)-100;p.y=Math.random()*(ch+200)-100;p.endX=p.x+(Math.random()-0.5)*400;p.endY=p.y+(Math.random()-0.5)*400;}}else{p.x+=p.vx*dt;p.y+=p.vy*dt;if(p.x<-80)p.x=cw+80;if(p.x>cw+80)p.x=-80;if(p.y<-80)p.y=ch+80;if(p.y>ch+80)p.y=-80;}}
+    ctx.save();for(var i=0;i<arr.length;i++){var p=arr[i];if(p.layer!=="far")continue;ctx.globalAlpha=p.alpha;ctx.fillStyle="#94a3b8";ctx.beginPath();ctx.arc(p.x,p.y,p.size,0,Math.PI*2);ctx.fill();}ctx.restore();
+    ctx.save();for(var i=0;i<arr.length;i++){var p=arr[i];if(p.layer!=="mid")continue;ctx.globalAlpha=p.alpha;ctx.shadowBlur=6;ctx.shadowColor="rgba(147,197,253,0.25)";ctx.fillStyle="#e2e8f0";ctx.beginPath();ctx.arc(p.x,p.y,p.size,0,Math.PI*2);ctx.fill();}ctx.restore();
+    ctx.save();for(var i=0;i<arr.length;i++){var p=arr[i];if(p.layer!=="near")continue;var cx=p.x+(p.endX-p.x)*p.progress,cy=p.y+(p.endY-p.y)*p.progress;var sa=0.3+0.5*Math.sin(p.progress*Math.PI);var dx=p.endX-p.x,dy=p.endY-p.y,len=Math.sqrt(dx*dx+dy*dy);if(len>0){dx/=len;dy/=len;}ctx.globalAlpha=sa;ctx.strokeStyle="rgba(96,165,250,0.5)";ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx-dx*20,cy-dy*20);ctx.stroke();ctx.fillStyle="rgba(147,197,253,0.85)";ctx.beginPath();ctx.arc(cx,cy,2,0,Math.PI*2);ctx.fill();}ctx.restore();
+  }
+
+  function drawVignette(){var w=canvas.width,h=canvas.height;var g=ctx.createRadialGradient(w/2,h/2,0,w/2,h/2,Math.max(w,h)*0.65);g.addColorStop(0,"rgba(0,0,0,0)");g.addColorStop(0.5,"rgba(0,0,0,0)");g.addColorStop(1,"rgba(0,0,0,0.55)");ctx.fillStyle=g;ctx.fillRect(0,0,w,h);}
+
+  function drawLinks(){
+    for(var i=0;i<renderNodes.length;i++){var c=renderNodes[i];var pids=c.parentIds||[];for(var j=0;j<pids.length;j++){var p=renderMap[pids[j]];if(p)drawLink(p,c);}}
+  }
+  function drawLink(from,to){
+    var x1=from.x,y1=from.y+(from._floatOffset||0),x2=to.x,y2=to.y+(to._floatOffset||0);
+    var dx=x2-x1,cp1x=x1+dx*0.4,cp1y=y1,cp2x=x2-dx*0.4,cp2y=y2;
+    ctx.beginPath();ctx.moveTo(x1,y1);ctx.bezierCurveTo(cp1x,cp1y,cp2x,cp2y,x2,y2);ctx.strokeStyle="rgba(51,65,85,0.3)";ctx.lineWidth=1.5;ctx.stroke();
+    var p0={x:x1,y:y1},p1={x:cp1x,y:cp1y},p2={x:cp2x,y:cp2y},p3={x:x2,y:y2},nd=3,sp=0.15,off=flowPhase*sp;
+    for(var d=0;d<nd;d++){var t=((off+d/nd)%1+1)%1,pt=bezierPoint(p0,p1,p2,p3,t),da=0.5+0.5*Math.sin(t*Math.PI);for(var k=1;k<=4;k++){var tt=((t-k*0.025)%1+1)%1,tp=bezierPoint(p0,p1,p2,p3,tt),ta=da*(1-k/5)*0.6;ctx.beginPath();ctx.arc(tp.x,tp.y,2.5-k*0.4,0,Math.PI*2);ctx.fillStyle="rgba(96,165,250,"+ta.toFixed(3)+")";ctx.fill();}ctx.beginPath();ctx.arc(pt.x,pt.y,2.5,0,Math.PI*2);ctx.fillStyle="rgba(147,197,253,"+da.toFixed(3)+")";ctx.fill();}
+  }
+
+  function drawNodes(){
+    for(var i=0;i<renderNodes.length;i++){drawNode(renderNodes[i]);}
+  }
+  function drawNode(node){
+    var ix=node.x,iy=node.y+(node._floatOffset||0),sc=node._enterScale||1;
+    var sx=(ix-camera.x)*camera.zoom+canvas.width/2,sy=(iy-camera.y)*camera.zoom+canvas.height/2;
+    var r=Math.max(10,node.id==="root"?36:24)*camera.zoom*sc;
+    if(sx+r<0||sx-r>canvas.width||sy+r<0||sy-r>canvas.height)return;
+    var isHover=hoveredNode===node,isSel=selectedNode===node;
+    var baseHue,baseSat,baseLit;
+    var catColors={math:"210,70%",hw:"30,70%",sw:"160,70%",sys:"280,70%",ai:"340,70%",app:"50,70%",root:"0,0%"};
+    var cc=catColors[node.category]||catColors.root;var parts=cc.split(",");baseHue=parseInt(parts[0]);baseSat=parts[1];
+    // State-based colors
+    if(node.state==="mastered"){baseLit="55%";}else if(node.state==="learning"){baseLit="48%";}else{baseLit="35%";}
+    var fillCol="hsla("+baseHue+","+baseSat+","+baseLit+",0.85)";
+    var borderCol="hsla("+baseHue+","+baseSat+",60%,0.4)";
+    // Glow
+    if(isSel){var gp=Math.min(1,(performance.now()-node._selectedTime)/300);ctx.shadowBlur=25*gp*camera.zoom;ctx.shadowColor="hsla("+baseHue+","+baseSat+",60%,0.5)";}
+    else if(isHover){ctx.shadowBlur=12*camera.zoom;ctx.shadowColor="hsla("+baseHue+","+baseSat+",60%,0.3)";}
+    else{ctx.shadowBlur=8*camera.zoom;ctx.shadowColor="hsla("+baseHue+","+baseSat+",50%,0.15)";}
+    // Body
+    ctx.beginPath();
+    var hw=r*2.5,hh=r*1.1;
+    ctx.roundRect(sx-hw/2,sy-hh/2,hw,hh,8*camera.zoom);
+    ctx.fillStyle=fillCol;ctx.fill();
+    ctx.strokeStyle=borderCol;ctx.lineWidth=1.5*camera.zoom;ctx.stroke();
+    // Reset shadow
+    ctx.shadowBlur=0;ctx.shadowColor="transparent";
+    // Icon
+    ctx.font=Math.round(16*camera.zoom*sc)+"px sans-serif";ctx.textAlign="center";ctx.textBaseline="middle";
+    ctx.fillStyle=node.state==="mastered"?"#86efac":"#e2e8f0";
+    ctx.fillText(node.icon||"○",sx,sy-4*camera.zoom*sc);
+    // Label
+    ctx.font="500 "+Math.round(10*camera.zoom*sc)+"px 'Inter','PingFang SC','Microsoft YaHei',sans-serif";
+    ctx.fillStyle=node.state==="mastered"?"rgba(134,239,172,0.9)" : node.state==="learning"?"rgba(147,197,253,0.9)":"rgba(226,232,240,0.8)";
+    ctx.fillText(node.label,sx,sy+12*camera.zoom*sc);
+    // Selected ring
+    if(isSel&&(performance.now()-node._selectedTime)>100){
+      ctx.beginPath();ctx.arc(sx,sy,r*1.1,0,Math.PI*2);ctx.strokeStyle="hsla("+baseHue+","+baseSat+",65%,0.5)";ctx.lineWidth=2*camera.zoom;ctx.setLineDash([4*camera.zoom,4*camera.zoom]);ctx.stroke();ctx.setLineDash([]);
+    }
+  }
+
+  function tick(time){
+    if(!running)return;
+    if(!lastTime)lastTime=time;
+    var dt=Math.min((time-lastTime)/1000,0.05);lastTime=time;
+    pulsePhase+=dt*0.5;flowPhase+=dt*0.4;
+    var w=canvas.width,h=canvas.height;
+    ctx.clearRect(0,0,w,h);
+    ctx.save();
+    drawGrid();
+    drawParticles(dt);
+    drawLinks();
+    drawNodes();
+    drawVignette();
+    ctx.restore();
+    // Camera inertia
+    if(camera._velX||camera._velY){camera.x-=camera._velX;camera.y-=camera._velY;camera._velX*=camera._dragDamping;camera._velY*=camera._dragDamping;if(Math.abs(camera._velX)<0.001&&Math.abs(camera._velY)<0.001){camera._velX=0;camera._velY=0;}}
+    // Node float
+    for(var i=0;i<renderNodes.length;i++){var n=renderNodes[i];n._floatOffset=Math.sin(pulsePhase*1.5+n.x*0.01+n.y*0.01)*1.5;}
+    rafId=requestAnimationFrame(tick);
+  }
+
+  function start(){if(running)return;running=true;lastTime=0;rafId=requestAnimationFrame(tick);}
+  function stop(){running=false;if(rafId){cancelAnimationFrame(rafId);rafId=null;}}
+
+  function hitTest(mx,my){
+    var world={x:(mx-canvas.width/2)/camera.zoom+camera.x,y:(my-canvas.height/2)/camera.zoom+camera.y};
+    var hw=60,hh=14;
+    for(var i=renderNodes.length-1;i>=0;i--){var n=renderNodes[i],fy=n.y+(n._floatOffset||0);if(world.x>=n.x-hw&&world.x<=n.x+hw&&world.y>=fy-hh&&world.y<=fy+hh)return n;}
+    return null;
+  }
+
+  function setNodes(nodes){renderNodes=nodes;renderMap={};for(var i=0;i<nodes.length;i++){renderMap[nodes[i].id]=nodes[i];}}
+
+  var _handlers={};
+  function bindEvents(){
+    if(!canvas)return;
+    _handlers.resize=function(){resize();};window.addEventListener("resize",_handlers.resize);
+    _handlers.mousedown=function(e){
+      var hit=hitTest(e.offsetX,e.offsetY);
+      if(hit){selectedNode=hit;hit.selected=true;hit._selectedTime=performance.now();if(onNodeClick)onNodeClick(hit);return;}
+      camera._dragging=true;camera._lastMX=e.offsetX;camera._lastMY=e.offsetY;camera._velX=0;camera._velY=0;
+    };
+    canvas.addEventListener("mousedown",_handlers.mousedown);
+    _handlers.mousemove=function(e){
+      var mx=e.offsetX,my=e.offsetY;
+      if(camera._dragging){var dx=mx-camera._lastMX,dy=my-camera._lastMY;camera.x-=dx/camera.zoom;camera.y-=dy/camera.zoom;camera._velX=-dx/camera.zoom;camera._velY=-dy/camera.zoom;camera._lastMX=mx;camera._lastMY=my;return;}
+      var hit=hitTest(mx,my);hoveredNode=hit;canvas.style.cursor=hit?"pointer":"grab";
+    };
+    canvas.addEventListener("mousemove",_handlers.mousemove);
+    _handlers.mouseup=function(){camera._dragging=false;};window.addEventListener("mouseup",_handlers.mouseup);
+    _handlers.wheel=function(e){e.preventDefault();camera.zoomAt(e.deltaY>0?0.9:1.1,e.offsetX,e.offsetY);};canvas.addEventListener("wheel",_handlers.wheel,{passive:false});
+  }
+
+  camera.zoomAt=function(factor,sx,sy){
+    var old=this.zoom;this.zoom=Math.min(this.maxZoom,Math.max(this.minZoom,this.zoom*factor));
+    var w=canvas.width,h=canvas.height;this.x=this.x+(sx-w/2)*(1/old-1/this.zoom);this.y=this.y+(sy-h/2)*(1/old-1/this.zoom);
+    var el=document.getElementById("zoomVal");if(el)el.textContent=Math.round(this.zoom*100)+"%";
+  };
+  camera.fitToNodes=function(nodes,padding){
+    padding=padding||80;if(!nodes||!nodes.length)return;
+    var mx=Infinity,my=Infinity,xx=-Infinity,xy=-Infinity;
+    for(var i=0;i<nodes.length;i++){var n=nodes[i];if(n.x<mx)mx=n.x;if(n.y<my)my=n.y;if(n.x>xx)xx=n.x;if(n.y>xy)xy=n.y;}
+    var ww=xx-mx+padding*2,wh=xy-my+padding*2;this.zoom=Math.min(canvas.width/ww,canvas.height/wh);this.x=(mx+xx)/2;this.y=(my+xy)/2;
+  };
+  camera.setZoom=function(z){this.zoom=Math.min(this.maxZoom,Math.max(this.minZoom,z));};
+
+  return{
+    init:init,resize:resize,setNodes:setNodes,hitTest:hitTest,camera:camera,
+    canvas:function(){return canvas;},renderNodes:function(){return renderNodes;},
+    start:start,stop:stop,
+    set onNodeClick(fn){onNodeClick=fn;}
+  };
+})();/* =============================================
+   PodUI — Detail panel, queue, search, nav
+   ============================================= */
+var PodUI = (function() {
+  // DOM refs
+  var detailOverlay, detailPanel, dIcon, dName, dPath, dDesc, dRank, dPrereqs, dNext, dResources, dHours, dQueueBtn;
+  var queueOverlay, queuePanel, queueList, queueBadge, queueEmpty, queueClose, queueClear;
+  var searchMask, searchInput, searchResults, searchEmpty;
+  var statusBar, nodeCountEl, fpsVal, zoomVal;
+  var navSkill, navTech, searchToggle, queueToggle;
+  var zoomIn, zoomOut;
+  var currentDetailId = null;
+  var queueTimer = null;
+  var fpsFrames = 0, fpsTime = 0;
+
+  function init() {
+    cacheDom();
+    bindUI();
+    renderQueue();
+    startFpsCounter();
+    // Auto-refresh queue every second
+    queueTimer = setInterval(function() {
+      if (queueOverlay.classList.contains("active")) renderQueue();
+    }, 1000);
+  }
+
+  function cacheDom() {
+    detailOverlay = document.getElementById("detailOverlay");
+    detailPanel = document.getElementById("detailPanel");
+    dIcon = document.getElementById("dIcon");
+    dName = document.getElementById("dName");
+    dPath = document.getElementById("dPath");
+    dDesc = document.getElementById("dDesc");
+    dRank = document.getElementById("dRank");
+    dPrereqs = document.getElementById("dPrereqs");
+    dNext = document.getElementById("dNext");
+    dResources = document.getElementById("dResources");
+    dHours = document.getElementById("dHours");
+    dQueueBtn = document.getElementById("dQueueBtn");
+    queueOverlay = document.getElementById("queueOverlay");
+    queuePanel = document.getElementById("queuePanel");
+    queueList = document.getElementById("queueList");
+    queueBadge = document.getElementById("queueBadge");
+    queueEmpty = document.getElementById("queueEmpty");
+    queueClose = document.getElementById("queueClose");
+    queueClear = document.getElementById("queueClear");
+    searchMask = document.getElementById("searchMask");
+    searchInput = document.getElementById("searchInput");
+    searchResults = document.getElementById("searchResults");
+    searchEmpty = document.getElementById("searchEmpty");
+    statusBar = document.getElementById("statusBar");
+    nodeCountEl = document.getElementById("nodeCount");
+    fpsVal = document.getElementById("fpsVal");
+    zoomVal = document.getElementById("zoomVal");
+    navSkill = document.getElementById("navSkill");
+    navTech = document.getElementById("navTech");
+    searchToggle = document.getElementById("searchToggle");
+    queueToggle = document.getElementById("queueToggle");
+    zoomIn = document.getElementById("zoomIn");
+    zoomOut = document.getElementById("zoomOut");
+  }
+
+  function bindUI() {
+    // Detail panel close
+    var doc=document,over=detailOverlay;
+    doc.getElementById("detailClose").addEventListener("click", closeDetail);
+    over.addEventListener("click", function(e) { if (e.target === over) closeDetail(); });
+    // Queue panel close
+    queueClose.addEventListener("click", hideQueue);
+    queueOverlay.addEventListener("click", function(e) { if (e.target === queueOverlay) hideQueue(); });
+    queueClear.addEventListener("click", function() {
+      PodEngine.queue.clear();
+      renderQueue();
+      updateDetailBtn();
+    });
+    // Search
+    searchToggle.addEventListener("click", toggleSearch);
+    queueToggle.addEventListener("click", toggleQueue);
+    searchMask.addEventListener("click", function(e) { if (e.target === searchMask) hideSearch(); });
+    searchInput.addEventListener("input", function() { renderSearch(this.value); });
+    searchInput.addEventListener("keydown", function(e) { if (e.key === "Escape") hideSearch(); });
+    // Nav segmented
+    navSkill.addEventListener("click", function() { setView("skill"); });
+    navTech.addEventListener("click", function() { setView("tech"); });
+    // Zoom controls
+    zoomOut.addEventListener("click", function() { PodRender.camera.zoomAt(0.85, window.innerWidth/2, window.innerHeight/2); });
+    zoomIn.addEventListener("click", function() { PodRender.camera.zoomAt(1.18, window.innerWidth/2, window.innerHeight/2); });
+    // Detail queue button
+    dQueueBtn.addEventListener("click", function() {
+      if (!currentDetailId) return;
+      if (PodEngine.queue.has(currentDetailId)) {
+        PodEngine.queue.remove(currentDetailId);
+      } else {
+        PodEngine.queue.add(currentDetailId);
+      }
+      renderQueue();
+      updateDetailBtn();
+    });
+    // Keyboard shortcuts
+    doc.addEventListener("keydown", function(e) {
+      if (e.key === "Escape") { closeDetail(); hideSearch(); hideQueue(); }
+      if ((e.ctrlKey || e.metaKey) && e.key === "f") { e.preventDefault(); showSearch(); }
+      if (e.key === "/" && !searchMask.classList.contains("active")) { e.preventDefault(); showSearch(); }
+    });
+  }
+
+  // ── Detail Panel ──
+  function openDetail(nodeId) {
+    var data = PodData.getNode(nodeId);
+    if (!data) return;
+    currentDetailId = nodeId;
+    dIcon.textContent = data.icon || "○";
+    dName.textContent = data.label;
+    // Path
+    var path = [];
+    var cur = data;
+    while (cur) {
+      if (cur.id === "root") break;
+      path.unshift(cur.label);
+      if (cur.parentIds && cur.parentIds.length) {
+        cur = PodData.getNode(cur.parentIds[0]);
+      } else { break; }
+    }
+    dPath.textContent = path.join(" → ");
+    dDesc.textContent = data.description || "";
+    // Rank levels I-V
+    dRank.innerHTML = "";
+    for (var i=1;i<=5;i++) {
+      var lvl = document.createElement("div");
+      lvl.className = "rank-lvl" + (i <= 3 ? " has" : "") + (i === 2 ? " cur" : "");
+      lvl.textContent = ["I","II","III","IV","V"][i-1];
+      dRank.appendChild(lvl);
+    }
+    // Prerequisites
+    dPrereqs.innerHTML = "";
+    if (data.prerequisites && data.prerequisites.length) {
+      data.prerequisites.forEach(function(pid) {
+        var pn = PodData.getNode(pid);
+        if (pn) {
+          var chip = document.createElement("span");
+          chip.className = "detail-chip";
+          chip.innerHTML = '<span class="chip-icon">◆</span> ' + pn.label;
+          chip.addEventListener("click", function() { closeDetail(); openDetail(pid); });
+          chip.style.cursor = "pointer";
+          dPrereqs.appendChild(chip);
+        }
+      });
+    } else {
+      dPrereqs.innerHTML = '<span style="color:#555;font-size:12px">无前置要求</span>';
+    }
+    // Next nodes
+    dNext.innerHTML = "";
+    var children = PodData.getChildren(nodeId);
+    if (children && children.length) {
+      children.forEach(function(cid) {
+        var cn = PodData.getNode(cid);
+        if (cn) {
+          var chip = document.createElement("span");
+          chip.className = "detail-chip";
+          chip.innerHTML = '<span class="chip-icon">▶</span> ' + cn.label;
+          chip.addEventListener("click", function() { closeDetail(); openDetail(cid); });
+          chip.style.cursor = "pointer";
+          dNext.appendChild(chip);
+        }
+      });
+    } else {
+      dNext.innerHTML = '<span style="color:#555;font-size:12px">无后续节点</span>';
+    }
+    // Resources
+    dResources.innerHTML = "";
+    if (data.resources && data.resources.length) {
+      data.resources.forEach(function(r) {
+        var a = document.createElement("a");
+        a.className = "detail-resource";
+        a.href = "#";
+        var typeColors = {book:"#6366f1",course:"#f59e0b",practice:"#10b981",tool:"#ec4899",paper:"#8b5cf6",article:"#06b6d4"};
+        var col = typeColors[r.type] || "#6366f1";
+        a.innerHTML = '<span class="res-type" style="background:'+col+'22;color:'+col+'">' + (r.type||"link") + '</span>' + r.name;
+        dResources.appendChild(a);
+      });
+    } else {
+      dResources.innerHTML = '<span style="color:#555;font-size:12px">暂无推荐资源</span>';
+    }
+    // Hours
+    dHours.innerHTML = '<span class="detail-hours">' + (data.estHours || "—") + '</span> 小时';
+    // Queue button
+    updateDetailBtn();
+    // Show
+    detailOverlay.classList.add("active");
+  }
+
+  function closeDetail() {
+    detailOverlay.classList.remove("active");
+    currentDetailId = null;
+  }
+
+  function updateDetailBtn() {
+    if (!currentDetailId) return;
+    if (PodEngine.queue.has(currentDetailId)) {
+      dQueueBtn.textContent = "✓ 已在队列中 — 移除";
+      dQueueBtn.className = "detail-btn in-queue";
+    } else {
+      dQueueBtn.textContent = "加入学习队列";
+      dQueueBtn.className = "detail-btn";
+    }
+  }
+
+  // ── Queue Panel ──
+  function toggleQueue() {
+    if (queueOverlay.classList.contains("active")) {
+      hideQueue();
+    } else {
+      showQueue();
+    }
+  }
+  function showQueue() { queueOverlay.classList.add("active"); renderQueue(); hideSearch(); closeDetail(); }
+  function hideQueue() { queueOverlay.classList.remove("active"); }
+
+  function renderQueue() {
+    var items = PodEngine.queue.items;
+    queueBadge.textContent = items.length;
+    var html = "";
+    if (!items.length) {
+      queueList.innerHTML = '<div class="queue-list-empty">队列为空，点击节点添加学习任务</div>';
+      return;
+    }
+    for (var i=0;i<items.length;i++) {
+      var item = items[i];
+      var node = PodData.getNode(item.nodeId);
+      if (!node) continue;
+      var elapsed = Math.floor((Date.now() - item.addedAt) / 3600000);
+      var timeStr = elapsed < 1 ? "刚加入" : elapsed + "h";
+      var tagClass = item.priority || "medium";
+      html += '<div class="queue-item" data-idx="' + i + '">';
+      html += '<div class="qi-icon">' + (node.icon||"○") + '</div>';
+      html += '<div class="qi-info">';
+      html += '<div class="qi-name">' + node.label + '</div>';
+      html += '<div class="qi-progress">';
+      for (var l=1;l<=5;l++) {
+        var cls = "qi-lvl" + (l <= 3 ? " has" : "");
+        html += '<div class="' + cls + '">' + ["I","II","III","IV","V"][l-1] + '</div>';
+      }
+      html += '</div></div>';
+      html += '<div class="qi-meta">';
+      html += '<div class="qi-time">' + timeStr + '</div>';
+      html += '<div class="qi-tag ' + tagClass + '">' + tagClass + '</div>';
+      html += '</div>';
+      html += '<button class="qi-remove" data-idx="' + i + '">✕</button>';
+      html += '</div>';
+    }
+    queueList.innerHTML = html;
+    // Bind remove buttons
+    queueList.querySelectorAll(".qi-remove").forEach(function(btn) {
+      btn.addEventListener("click", function(e) {
+        e.stopPropagation();
+        var idx = parseInt(this.dataset.idx);
+        var item = PodEngine.queue.items[idx];
+        if (item) {
+          PodEngine.queue.remove(item.nodeId);
+          renderQueue();
+          updateDetailBtn();
+        }
+      });
+    });
+    // Bind click to navigate to node
+    queueList.querySelectorAll(".queue-item").forEach(function(el) {
+      el.addEventListener("click", function(e) {
+        if (e.target.closest(".qi-remove")) return;
+        var idx = parseInt(this.dataset.idx);
+        var item = PodEngine.queue.items[idx];
+        if (item) {
+          hideQueue();
+          var node = PodData.getNode(item.nodeId);
+          if (node && PodRender.renderNodes) {
+            var rns = PodRender.renderNodes();
+            for (var k=0;k<rns.length;k++) {
+              if (rns[k].id === item.nodeId) {
+                PodRender.camera.x = rns[k].x;
+                PodRender.camera.y = rns[k].y;
+                PodRender.camera.setZoom(1.2);
+                break;
+              }
+            }
+            openDetail(item.nodeId);
+          }
+        }
+      });
+    });
+    // Drag to reorder
+    initQueueDrag();
+  }
+
+  var _dragState = null;
+  function initQueueDrag() {
+    var items = queueList.querySelectorAll(".queue-item");
+    items.forEach(function(el) {
+      el.draggable = true;
+      el.addEventListener("dragstart", function(e) {
+        _dragState = { from: parseInt(this.dataset.idx) };
+        this.classList.add("dragging");
+        e.dataTransfer.effectAllowed = "move";
+      });
+      el.addEventListener("dragend", function() {
+        this.classList.remove("dragging");
+        items.forEach(function(i){i.classList.remove("drag-over");});
+        _dragState = null;
+      });
+      el.addEventListener("dragover", function(e) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = "move";
+        if (_dragState && parseInt(this.dataset.idx) !== _dragState.from) {
+          items.forEach(function(i){i.classList.remove("drag-over");});
+          this.classList.add("drag-over");
+        }
+      });
+      el.addEventListener("dragleave", function() { this.classList.remove("drag-over"); });
+      el.addEventListener("drop", function(e) {
+        e.preventDefault();
+        this.classList.remove("drag-over");
+        if (_dragState) {
+          var to = parseInt(this.dataset.idx);
+          PodEngine.queue.reorder(_dragState.from, to);
+          renderQueue();
+        }
+      });
+    });
+  }
+
+  // ── Search ──
+  function toggleSearch() {
+    if (searchMask.classList.contains("active")) {
+      hideSearch();
+    } else {
+      showSearch();
+    }
+  }
+  function showSearch() {
+    searchMask.classList.add("active");
+    searchInput.value = "";
+    searchResults.innerHTML = '<div class="search-results-empty" id="searchEmpty">输入关键词开始搜索</div>';
+    setTimeout(function() { searchInput.focus(); }, 100);
+    hideQueue(); closeDetail();
+  }
+  function hideSearch() { searchMask.classList.remove("active"); }
+
+  function renderSearch(query) {
+    var results = PodData.getFiltered(query);
+    if (!results || !results.length) {
+      searchResults.innerHTML = '<div class="search-results-empty">没有找到匹配节点</div>';
+      return;
+    }
+    var html = "";
+    for (var i=0;i<results.length;i++) {
+      var n = results[i];
+      var matchField = "";
+      var q = query.toLowerCase().trim();
+      if (n.label.toLowerCase().indexOf(q) !== -1) matchField = "名称匹配";
+      else if (n.id.toLowerCase().indexOf(q) !== -1) matchField = "ID匹配";
+      else if ((n.tags||[]).some(function(t){return t.toLowerCase().indexOf(q)!==-1;})) matchField = "标签匹配";
+      html += '<div class="search-result-item" data-id="' + n.id + '">';
+      html += '<div class="sri-icon">' + (n.icon||"○") + '</div>';
+      html += '<div class="sri-info">';
+      html += '<div class="sri-name">' + n.label + '</div>';
+      html += '<div class="sri-path">' + n.description.substring(0,40) + (n.description.length>40?"…":"") + '</div>';
+      html += '</div>';
+      html += '<div class="sri-match">' + matchField + '</div>';
+      html += '</div>';
+    }
+    searchResults.innerHTML = html;
+    searchResults.querySelectorAll(".search-result-item").forEach(function(el) {
+      el.addEventListener("click", function() {
+        var id = this.dataset.id;
+        if (id) {
+          hideSearch();
+          var node = PodData.getNode(id);
+          if (node && PodRender.renderNodes) {
+            var rns = PodRender.renderNodes();
+            for (var k=0;k<rns.length;k++) {
+              if (rns[k].id === id) {
+                PodRender.camera.x = rns[k].x;
+                PodRender.camera.y = rns[k].y;
+                PodRender.camera.setZoom(1.2);
+                break;
+              }
+            }
+            openDetail(id);
+          }
+        }
+      });
+    });
+  }
+
+  // ── Navigation ──
+  function setView(mode) {
+    if (mode === "tech") {
+      navTech.classList.add("act");
+      navSkill.classList.remove("act");
+    } else {
+      navSkill.classList.add("act");
+      navTech.classList.remove("act");
+    }
+  }
+
+  // ── FPS Counter ──
+  function startFpsCounter() {
+    var last = performance.now();
+    function tick() {
+      var now = performance.now();
+      fpsFrames++;
+      if (now - fpsTime >= 1000) {
+        if (fpsVal) fpsVal.textContent = fpsFrames;
+        fpsFrames = 0;
+        fpsTime = now;
+      }
+      requestAnimationFrame(tick);
+    }
+    fpsTime = performance.now();
+    requestAnimationFrame(tick);
+  }
+
+  // ── Public API ──
+  return {
+    init: init,
+    openDetail: openDetail,
+    closeDetail: closeDetail,
+    toggleQueue: toggleQueue,
+    showQueue: showQueue,
+    hideQueue: hideQueue,
+    showSearch: showSearch,
+    hideSearch: hideSearch,
+    renderQueue: renderQueue
+  };
+})();/* =============================================
+   Boot — initialize everything
+   ============================================= */
+(function() {
+  var allNodes = PodData.all;
+  var nodeMap = PodData.map;
+
+  // Filter out root node for rendering
+  var renderNodes = allNodes.filter(function(n) { return n.id !== "root"; });
+
+  // Run force layout
+  PodEngine.forceLayout(renderNodes, nodeMap);
+
+  // Set nodes on renderer
+  PodRender.setNodes(renderNodes);
+
+  // Initialize canvas
+  var canvasEl = document.getElementById("treeCanvas");
+  PodRender.init(canvasEl);
+
+  // Fit camera to show all nodes
+  PodRender.camera.fitToNodes(renderNodes);
+
+  // Connect node click → detail panel
+  PodRender.onNodeClick = function(node) {
+    PodUI.openDetail(node.id);
+  };
+
+  // Initialize UI
+  PodUI.init();
+
+  // Update node count
+  var nc = document.getElementById("nodeCount");
+  if (nc) nc.textContent = renderNodes.length;
+
+  // Start animation
+  PodRender.start();
+
+  // Throttled resize
+  var resizeTimer = null;
+  window.addEventListener("resize", function() {
+    if (resizeTimer) clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(function() {
+      PodRender.resize();
+      if (PodRender.camera.fitToNodes) {
+        var rns = PodRender.renderNodes();
+        if (rns && rns.length) PodRender.camera.fitToNodes(rns);
+      }
+    }, 150);
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,711 @@
+var TECH_TREE = {
+  root: {
+    id: "root",
+    name: "计算机科学知识体系",
+    icon: "🌳",
+    desc: "计算机科学六大核心领域——数学理论、硬件体系、软件算法、系统工程、人工智能、应用实践，构筑完整的知识图谱。",
+    category: "root",
+    prerequisites: [],
+    estHours: 0,
+    resources: [],
+    tags: ["计算机科学", "知识体系"],
+    children: ["math", "hw", "sw", "sys", "ai", "app"]
+  },
+
+  // ===== 数学与理论基础 =====
+  math: {
+    id: "math",
+    name: "数学与理论基础",
+    icon: "∑",
+    desc: "计算机科学的数学根基，涵盖离散结构、计算理论、信息论与数值方法。",
+    category: "root",
+    prerequisites: [],
+    estHours: 0,
+    resources: [],
+    tags: ["数学", "理论"],
+    children: ["math-discrete", "math-computation", "math-info-theory", "math-numerical"]
+  },
+  "math-discrete": {
+    id: "math-discrete",
+    name: "离散数学",
+    icon: "⊂",
+    desc: "研究离散结构的数学分支，是计算机科学最直接的数学基础。",
+    category: "math",
+    prerequisites: ["math"],
+    estHours: 80,
+    resources: [
+      { name: "《离散数学及其应用》", type: "book" },
+      { name: "MIT 6.042J Mathematics for Computer Science", type: "course" }
+    ],
+    tags: ["离散数学", "基础"],
+    children: ["math-logic", "math-graph", "math-combinatorics"]
+  },
+  "math-logic": {
+    id: "math-logic",
+    name: "数理逻辑",
+    icon: "⊨",
+    desc: "命题逻辑、谓词逻辑、推理系统——数学推理和程序验证的基石。",
+    category: "math",
+    prerequisites: ["math-discrete"],
+    estHours: 40,
+    resources: [
+      { name: "《数理逻辑》", type: "book" },
+      { name: "《数学原理》", type: "book" }
+    ],
+    tags: ["逻辑", "推理", "证明"],
+    children: []
+  },
+  "math-graph": {
+    id: "math-graph",
+    name: "图论",
+    icon: "◌",
+    desc: "图与网络的数学理论，广泛应用于网络分析、路径规划和社交图谱。",
+    category: "math",
+    prerequisites: ["math-discrete"],
+    estHours: 45,
+    resources: [
+      { name: "《图论导引》", type: "book" },
+      { name: "Coursera Algorithms on Graphs", type: "course" }
+    ],
+    tags: ["图", "网络", "组合"],
+    children: []
+  },
+  "math-combinatorics": {
+    id: "math-combinatorics",
+    name: "组合数学",
+    icon: "⊄",
+    desc: "计数、排列组合、生成函数与鸽巢原理——算法分析与概率方法的基础。",
+    category: "math",
+    prerequisites: ["math-discrete"],
+    estHours: 35,
+    resources: [
+      { name: "《组合数学》", type: "book" },
+      { name: "《具体数学》", type: "book" }
+    ],
+    tags: ["组合", "计数", "概率"],
+    children: []
+  },
+  "math-computation": {
+    id: "math-computation",
+    name: "计算理论",
+    icon: "⟳",
+    desc: "研究计算的本质与极限，包括自动机、可计算性和计算复杂性。",
+    category: "math",
+    prerequisites: ["math", "math-discrete"],
+    estHours: 60,
+    resources: [
+      { name: "《计算理论导引》", type: "book" },
+      { name: "《自动机理论、语言和计算导论》", type: "book" }
+    ],
+    tags: ["计算", "自动机", "复杂性"],
+    children: ["math-automata", "math-complexity"]
+  },
+  "math-automata": {
+    id: "math-automata",
+    name: "自动机理论",
+    icon: "↻",
+    desc: "有限自动机、下推自动机、图灵机——形式语言与计算模型的根基。",
+    category: "math",
+    prerequisites: ["math-computation"],
+    estHours: 35,
+    resources: [
+      { name: "《自动机理论、语言和计算导论》", type: "book" },
+      { name: "Stanford CS154", type: "course" }
+    ],
+    tags: ["自动机", "形式语言", "正则"],
+    children: []
+  },
+  "math-complexity": {
+    id: "math-complexity",
+    name: "计算复杂度",
+    icon: "⏳",
+    desc: "P/NP、NP完备性、近似算法——判定问题内在难度的理论框架。",
+    category: "math",
+    prerequisites: ["math-computation"],
+    estHours: 40,
+    resources: [
+      { name: "《计算复杂性》", type: "book" },
+      { name: "《算法导论》复杂度章节", type: "book" }
+    ],
+    tags: ["复杂度", "NP", "P"],
+    children: []
+  },
+  "math-info-theory": {
+    id: "math-info-theory",
+    name: "信息论",
+    icon: "ℹ",
+    desc: "信息的量化、存储与通信——熵、互信息、信道编码等核心概念。",
+    category: "math",
+    prerequisites: ["math"],
+    estHours: 45,
+    resources: [
+      { name: "《信息论基础》", type: "book" },
+      { name: "《Elements of Information Theory》", type: "book" }
+    ],
+    tags: ["信息", "熵", "编码"],
+    children: []
+  },
+  "math-numerical": {
+    id: "math-numerical",
+    name: "数值方法",
+    icon: "≈",
+    desc: "数值逼近、线性代数计算、微分方程数值解——科学计算的核心工具。",
+    category: "math",
+    prerequisites: ["math"],
+    estHours: 50,
+    resources: [
+      { name: "《数值分析》", type: "book" },
+      { name: "MIT 18.335", type: "course" }
+    ],
+    tags: ["数值", "近似", "计算"],
+    children: []
+  },
+
+  // ===== 硬件与体系结构 =====
+  hw: {
+    id: "hw",
+    name: "硬件与体系结构",
+    icon: "⚙",
+    desc: "计算机硬件组成与体系结构设计，从晶体管到网络通信的全栈理解。",
+    category: "root",
+    prerequisites: [],
+    estHours: 0,
+    resources: [],
+    tags: ["硬件", "体系结构"],
+    children: ["hw-digital", "hw-arch", "hw-memory", "hw-network"]
+  },
+  "hw-digital": {
+    id: "hw-digital",
+    name: "数字逻辑",
+    icon: "⊓",
+    desc: "布尔代数、逻辑门、组合与时序电路——数字系统设计的底层基础。",
+    category: "hw",
+    prerequisites: ["hw"],
+    estHours: 50,
+    resources: [
+      { name: "《数字逻辑与计算机设计》", type: "book" },
+      { name: "《数字设计和计算机体系结构》", type: "book" }
+    ],
+    tags: ["数字逻辑", "电路", "布尔"],
+    children: []
+  },
+  "hw-arch": {
+    id: "hw-arch",
+    name: "处理器架构",
+    icon: "▣",
+    desc: "指令集架构、流水线、乱序执行、多核与向量处理——CPU设计的核心概念。",
+    category: "hw",
+    prerequisites: ["hw", "hw-digital"],
+    estHours: 70,
+    resources: [
+      { name: "《计算机组成与设计》", type: "book" },
+      { name: "《计算机体系结构：量化研究方法》", type: "book" },
+      { name: "UC Berkeley CS61C", type: "course" }
+    ],
+    tags: ["CPU", "架构", "流水线"],
+    children: []
+  },
+  "hw-memory": {
+    id: "hw-memory",
+    name: "存储体系",
+    icon: "⬡",
+    desc: "存储器层次结构——缓存、主存、虚拟内存与存储系统的性能优化。",
+    category: "hw",
+    prerequisites: ["hw", "hw-arch"],
+    estHours: 35,
+    resources: [
+      { name: "《计算机组成与设计》存储章节", type: "book" },
+      { name: "《深入理解计算机系统》存储部分", type: "book" }
+    ],
+    tags: ["存储", "缓存", "内存"],
+    children: []
+  },
+  "hw-network": {
+    id: "hw-network",
+    name: "计算机网络",
+    icon: "◎",
+    desc: "分层网络模型、TCP/IP协议栈、路由与交换——互联网的骨架。",
+    category: "hw",
+    prerequisites: ["hw"],
+    estHours: 60,
+    resources: [
+      { name: "《计算机网络：自顶向下方法》", type: "book" },
+      { name: "Stanford CS144", type: "course" }
+    ],
+    tags: ["网络", "TCP/IP", "协议"],
+    children: []
+  },
+
+  // ===== 软件与算法 =====
+  sw: {
+    id: "sw",
+    name: "软件与算法",
+    icon: "⌨",
+    desc: "数据结构、算法设计、编程语言与软件架构——构建高效程序的支柱。",
+    category: "root",
+    prerequisites: [],
+    estHours: 0,
+    resources: [],
+    tags: ["软件", "算法"],
+    children: ["sw-ds", "sw-algo", "sw-pl", "sw-arch"]
+  },
+  "sw-ds": {
+    id: "sw-ds",
+    name: "数据结构",
+    icon: "▤",
+    desc: "信息在计算机中的组织方式——栈、队列、树、图与哈希表的原理与实现。",
+    category: "sw",
+    prerequisites: ["sw"],
+    estHours: 60,
+    resources: [
+      { name: "《算法导论》", type: "book" },
+      { name: "MIT 6.006 Introduction to Algorithms", type: "course" }
+    ],
+    tags: ["数据结构", "基础"],
+    children: ["sw-array", "sw-tree"]
+  },
+  "sw-array": {
+    id: "sw-array",
+    name: "数组与链表",
+    icon: "⊞",
+    desc: "最基础的线性存储结构——数组的随机访问与链表的动态插入删除特性。",
+    category: "sw",
+    prerequisites: ["sw-ds"],
+    estHours: 20,
+    resources: [
+      { name: "《算法》第四版", type: "book" },
+      { name: "LeetCode 数组/链表专题", type: "practice" }
+    ],
+    tags: ["数组", "链表", "线性结构"],
+    children: []
+  },
+  "sw-tree": {
+    id: "sw-tree",
+    name: "树结构",
+    icon: "♢",
+    desc: "二叉树、平衡树、堆与并查集——层次化数据组织与高效检索的基石。",
+    category: "sw",
+    prerequisites: ["sw-ds"],
+    estHours: 35,
+    resources: [
+      { name: "《算法导论》树章节", type: "book" },
+      { name: "LeetCode 树专题", type: "practice" }
+    ],
+    tags: ["树", "二叉树", "平衡树"],
+    children: []
+  },
+  "sw-algo": {
+    id: "sw-algo",
+    name: "算法设计",
+    icon: "⚡",
+    desc: "分治、贪心、动态规划与图算法——解决计算问题的系统方法与范式。",
+    category: "sw",
+    prerequisites: ["sw", "sw-ds"],
+    estHours: 80,
+    resources: [
+      { name: "《算法导论》", type: "book" },
+      { name: "《算法设计手册》", type: "book" },
+      { name: "MIT 6.006/6.046", type: "course" }
+    ],
+    tags: ["算法", "设计", "基础"],
+    children: ["sw-sort", "sw-dp"]
+  },
+  "sw-sort": {
+    id: "sw-sort",
+    name: "排序算法",
+    icon: "⇕",
+    desc: "比较排序、线性时间排序、外部排序——理解算法复杂度与设计的经典入口。",
+    category: "sw",
+    prerequisites: ["sw-algo"],
+    estHours: 25,
+    resources: [
+      { name: "《算法导论》排序章节", type: "book" },
+      { name: "Sorting Algorithm Visualizations", type: "tool" }
+    ],
+    tags: ["排序", "比较", "复杂度"],
+    children: []
+  },
+  "sw-dp": {
+    id: "sw-dp",
+    name: "动态规划",
+    icon: "⊞",
+    desc: "最优子结构与重叠子问题——从背包问题到序列比对的高效求解范式。",
+    category: "sw",
+    prerequisites: ["sw-algo"],
+    estHours: 45,
+    resources: [
+      { name: "《算法导论》DP章节", type: "book" },
+      { name: "《算法竞赛入门经典》DP部分", type: "book" }
+    ],
+    tags: ["动态规划", "优化", "递归"],
+    children: []
+  },
+  "sw-pl": {
+    id: "sw-pl",
+    name: "编程语言",
+    icon: "⋯",
+    desc: "类型系统、内存模型、抽象机制与编程范式——理解语言设计的深层原理。",
+    category: "sw",
+    prerequisites: ["sw"],
+    estHours: 50,
+    resources: [
+      { name: "《编程语言实现模式》", type: "book" },
+      { name: "《Types and Programming Languages》", type: "book" },
+      { name: "Coursera Programming Languages", type: "course" }
+    ],
+    tags: ["编程语言", "类型", "范式"],
+    children: []
+  },
+  "sw-arch": {
+    id: "sw-arch",
+    name: "软件架构",
+    icon: "◈",
+    desc: "设计模式、架构风格、微服务与DDD——构建可维护大规模系统的原则与实践。",
+    category: "sw",
+    prerequisites: ["sw", "sw-algo"],
+    estHours: 60,
+    resources: [
+      { name: "《架构整洁之道》", type: "book" },
+      { name: "《设计模式》", type: "book" },
+      { name: "《领域驱动设计》", type: "book" }
+    ],
+    tags: ["架构", "设计模式", "工程"],
+    children: []
+  },
+
+  // ===== 系统与工程 =====
+  sys: {
+    id: "sys",
+    name: "系统与工程",
+    icon: "⚡",
+    desc: "操作系统、数据库与分布式系统——让软件可靠高效运行的核心基础设施。",
+    category: "root",
+    prerequisites: [],
+    estHours: 0,
+    resources: [],
+    tags: ["系统", "工程"],
+    children: ["sys-os", "sys-db", "sys-distributed"]
+  },
+  "sys-os": {
+    id: "sys-os",
+    name: "操作系统",
+    icon: "⊟",
+    desc: "操作系统原理——进程调度、内存管理、文件系统与设备驱动的核心机制。",
+    category: "sys",
+    prerequisites: ["sys"],
+    estHours: 80,
+    resources: [
+      { name: "《操作系统导论》", type: "book" },
+      { name: "《深入理解计算机系统》", type: "book" },
+      { name: "MIT 6.S081", type: "course" }
+    ],
+    tags: ["操作系统", "内核", "调度"],
+    children: ["sys-process", "sys-memory"]
+  },
+  "sys-process": {
+    id: "sys-process",
+    name: "进程管理",
+    icon: "⊘",
+    desc: "进程与线程模型、调度算法、同步互斥与死锁——并发执行的核心问题。",
+    category: "sys",
+    prerequisites: ["sys-os"],
+    estHours: 35,
+    resources: [
+      { name: "《操作系统导论》并发章节", type: "book" },
+      { name: "《UNIX环境高级编程》", type: "book" }
+    ],
+    tags: ["进程", "线程", "并发", "同步"],
+    children: []
+  },
+  "sys-memory": {
+    id: "sys-memory",
+    name: "内存管理",
+    icon: "▣",
+    desc: "分段分页、虚拟内存、页面置换与内存分配策略——存储资源的高效管理。",
+    category: "sys",
+    prerequisites: ["sys-os"],
+    estHours: 30,
+    resources: [
+      { name: "《操作系统导论》内存章节", type: "book" },
+      { name: "《深入理解计算机系统》内存部分", type: "book" }
+    ],
+    tags: ["内存", "虚拟内存", "分页"],
+    children: []
+  },
+  "sys-db": {
+    id: "sys-db",
+    name: "数据库",
+    icon: "▤",
+    desc: "数据持久化与查询——关系模型、事务处理与存储引擎的核心原理。",
+    category: "sys",
+    prerequisites: ["sys"],
+    estHours: 60,
+    resources: [
+      { name: "《数据库系统概论》", type: "book" },
+      { name: "《数据库系统实现》", type: "book" },
+      { name: "CMU 15-445", type: "course" }
+    ],
+    tags: ["数据库", "SQL", "事务"],
+    children: ["sys-relational", "sys-nosql"]
+  },
+  "sys-relational": {
+    id: "sys-relational",
+    name: "关系数据库",
+    icon: "⊞",
+    desc: "关系模型、SQL查询优化、事务ACID与并发控制——经典数据库核心。",
+    category: "sys",
+    prerequisites: ["sys-db"],
+    estHours: 40,
+    resources: [
+      { name: "《数据库系统概论》", type: "book" },
+      { name: "CMU 15-445 Project", type: "course" }
+    ],
+    tags: ["关系", "SQL", "ACID"],
+    children: []
+  },
+  "sys-nosql": {
+    id: "sys-nosql",
+    name: "NoSQL",
+    icon: "◌",
+    desc: "键值、文档、列族与图数据库——非关系数据模型与CAP理论的权衡实践。",
+    category: "sys",
+    prerequisites: ["sys-db"],
+    estHours: 30,
+    resources: [
+      { name: "《NoSQL精粹》", type: "book" },
+      { name: "《Designing Data-Intensive Applications》", type: "book" }
+    ],
+    tags: ["NoSQL", "CAP", "分布式"],
+    children: []
+  },
+  "sys-distributed": {
+    id: "sys-distributed",
+    name: "分布式系统",
+    icon: "◎",
+    desc: "一致性协议、分布式存储、共识算法与容错——构建大规模集群的理论基础。",
+    category: "sys",
+    prerequisites: ["sys"],
+    estHours: 80,
+    resources: [
+      { name: "《Designing Data-Intensive Applications》", type: "book" },
+      { name: "MIT 6.824 Distributed Systems", type: "course" }
+    ],
+    tags: ["分布式", "共识", "一致性"],
+    children: []
+  },
+
+  // ===== 人工智能 =====
+  ai: {
+    id: "ai",
+    name: "人工智能",
+    icon: "◇",
+    desc: "让机器具备感知、推理与决策能力的理论、算法与实践。",
+    category: "root",
+    prerequisites: [],
+    estHours: 0,
+    resources: [],
+    tags: ["人工智能", "机器学习"],
+    children: ["ai-ml", "ai-dl", "ai-nlp", "ai-cv"]
+  },
+  "ai-ml": {
+    id: "ai-ml",
+    name: "机器学习",
+    icon: "⊡",
+    desc: "从数据中学习的算法——回归、分类、聚类与降维的统计基础。",
+    category: "ai",
+    prerequisites: ["ai"],
+    estHours: 80,
+    resources: [
+      { name: "《机器学习》（周志华）", type: "book" },
+      { name: "《统计学习方法》", type: "book" },
+      { name: "Stanford CS229", type: "course" }
+    ],
+    tags: ["机器学习", "统计", "基础"],
+    children: ["ai-supervised", "ai-unsupervised"]
+  },
+  "ai-supervised": {
+    id: "ai-supervised",
+    name: "监督学习",
+    icon: "⊢",
+    desc: "线性回归、支持向量机、决策树与集成方法——基于标注数据的预测模型。",
+    category: "ai",
+    prerequisites: ["ai-ml"],
+    estHours: 50,
+    resources: [
+      { name: "《统计学习方法》", type: "book" },
+      { name: "《The Elements of Statistical Learning》", type: "book" },
+      { name: "Stanford CS229", type: "course" }
+    ],
+    tags: ["监督学习", "分类", "回归"],
+    children: []
+  },
+  "ai-unsupervised": {
+    id: "ai-unsupervised",
+    name: "无监督学习",
+    icon: "⊣",
+    desc: "聚类、降维、密度估计与生成模型——从无标签数据中发现隐藏结构。",
+    category: "ai",
+    prerequisites: ["ai-ml"],
+    estHours: 35,
+    resources: [
+      { name: "《机器学习》聚类章节", type: "book" },
+      { name: "《Pattern Recognition and Machine Learning》", type: "book" }
+    ],
+    tags: ["无监督", "聚类", "降维"],
+    children: []
+  },
+  "ai-dl": {
+    id: "ai-dl",
+    name: "深度学习",
+    icon: "⊠",
+    desc: "多层神经网络的原理——反向传播、激活函数、正则化与优化方法。",
+    category: "ai",
+    prerequisites: ["ai", "ai-ml"],
+    estHours: 70,
+    resources: [
+      { name: "《深度学习》（花书）", type: "book" },
+      { name: "Stanford CS231n", type: "course" },
+      { name: "fast.ai Practical Deep Learning", type: "course" }
+    ],
+    tags: ["深度学习", "神经网络", "反向传播"],
+    children: ["ai-cnn", "ai-transformer"]
+  },
+  "ai-cnn": {
+    id: "ai-cnn",
+    name: "卷积网络",
+    icon: "⊟",
+    desc: "卷积、池化与全连接——图像特征提取与视觉理解的基石架构。",
+    category: "ai",
+    prerequisites: ["ai-dl"],
+    estHours: 40,
+    resources: [
+      { name: "Stanford CS231n", type: "course" },
+      { name: "《深度学习》卷积章节", type: "book" }
+    ],
+    tags: ["CNN", "卷积", "视觉"],
+    children: []
+  },
+  "ai-transformer": {
+    id: "ai-transformer",
+    name: "Transformer",
+    icon: "⟐",
+    desc: "自注意力机制与多头注意力——现代NLP与多模态模型的革命性架构。",
+    category: "ai",
+    prerequisites: ["ai-dl"],
+    estHours: 45,
+    resources: [
+      { name: "《Attention Is All You Need》", type: "paper" },
+      { name: "《The Annotated Transformer》", type: "article" },
+      { name: "Stanford CS224n", type: "course" }
+    ],
+    tags: ["Transformer", "注意力", "NLP"],
+    children: []
+  },
+  "ai-nlp": {
+    id: "ai-nlp",
+    name: "自然语言处理",
+    icon: "⊡",
+    desc: "词嵌入、序列标注、文本生成与预训练语言模型——让计算机理解语言。",
+    category: "ai",
+    prerequisites: ["ai", "ai-ml", "ai-dl"],
+    estHours: 60,
+    resources: [
+      { name: "《Speech and Language Processing》", type: "book" },
+      { name: "Stanford CS224n", type: "course" }
+    ],
+    tags: ["NLP", "语言模型", "文本"],
+    children: []
+  },
+  "ai-cv": {
+    id: "ai-cv",
+    name: "计算机视觉",
+    icon: "◰",
+    desc: "图像分类、目标检测、语义分割与生成——赋予机器看的能力。",
+    category: "ai",
+    prerequisites: ["ai", "ai-dl", "ai-cnn"],
+    estHours: 55,
+    resources: [
+      { name: "Stanford CS231n", type: "course" },
+      { name: "《Computer Vision: Algorithms and Applications》", type: "book" }
+    ],
+    tags: ["视觉", "图像", "检测"],
+    children: []
+  },
+
+  // ===== 应用与实践 =====
+  app: {
+    id: "app",
+    name: "应用与实践",
+    icon: "⚒",
+    desc: "将理论应用于真实场景——工具链、安全、游戏与交互设计的工程实践。",
+    category: "root",
+    prerequisites: [],
+    estHours: 0,
+    resources: [],
+    tags: ["应用", "实践"],
+    children: ["app-tools", "app-security", "app-game", "app-hci"]
+  },
+  "app-tools": {
+    id: "app-tools",
+    name: "开发工具",
+    icon: "⚙",
+    desc: "版本控制、构建工具、调试器与CI/CD——高效开发工作流的核心装备。",
+    category: "app",
+    prerequisites: ["app"],
+    estHours: 30,
+    resources: [
+      { name: "《Pro Git》", type: "book" },
+      { name: "《持续交付》", type: "book" }
+    ],
+    tags: ["工具", "Git", "CI/CD"],
+    children: []
+  },
+  "app-security": {
+    id: "app-security",
+    name: "安全与密码",
+    icon: "⊡",
+    desc: "对称/非对称加密、认证协议、Web安全与渗透测试——保护系统与数据。",
+    category: "app",
+    prerequisites: ["app"],
+    estHours: 50,
+    resources: [
+      { name: "《图解密码技术》", type: "book" },
+      { name: "《白帽子讲Web安全》", type: "book" },
+      { name: "Stanford CS255", type: "course" }
+    ],
+    tags: ["安全", "密码学", "渗透"],
+    children: []
+  },
+  "app-game": {
+    id: "app-game",
+    name: "游戏开发",
+    icon: "◈",
+    desc: "游戏引擎架构、渲染管线、物理模拟与游戏设计——从创意到可玩产品。",
+    category: "app",
+    prerequisites: ["app"],
+    estHours: 60,
+    resources: [
+      { name: "《游戏引擎架构》", type: "book" },
+      { name: "Unity/Unreal官方教程", type: "course" }
+    ],
+    tags: ["游戏", "引擎", "渲染"],
+    children: []
+  },
+  "app-hci": {
+    id: "app-hci",
+    name: "人机交互",
+    icon: "◉",
+    desc: "可用性工程、用户界面设计、交互范式与认知工效学——以人为中心的设计。",
+    category: "app",
+    prerequisites: ["app"],
+    estHours: 35,
+    resources: [
+      { name: "《设计心理学》", type: "book" },
+      { name: "《About Face 4》", type: "book" }
+    ],
+    tags: ["交互", "UI/UX", "可用性"],
+    children: []
+  }
+};
+
+// Total nodes: 47
